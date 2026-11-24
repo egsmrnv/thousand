@@ -1,46 +1,6 @@
-const SUITS = {
-    HEARTS: 0,
-    DIAMONDS: 1,
-    CLUBS: 2,
-    SPADES: 3
-} as const;
-
-/**
- * Cards in this game: 9, J, Q, K, 10, A
- */
-const RANKS = {
-    ACE: 0,
-    TEN: 1,
-    KING: 2,
-    QUEEN: 3,
-    JACK: 4,
-    NINE: 5
-} as const;
-
-const POINTS = {
-    [RANKS.ACE]: 11,
-    [RANKS.TEN]: 10,
-    [RANKS.KING]: 4,
-    [RANKS.QUEEN]: 3,
-    [RANKS.JACK]: 2,
-    [RANKS.NINE]: 0
-} as const;
-
-const MARRIAGE_POINTS = {
-    [SUITS.HEARTS]: 100,
-    [SUITS.DIAMONDS]: 80,
-    [SUITS.CLUBS]: 60,
-    [SUITS.SPADES]: 40
-} as const;
-
-const MARRIAGE_ACE_POINTS = 200;
-
-/**
- * Можно объявлять марьяж, имея в руке туза каждой масти.
- * 
- * Can declare a marriage by having an Ace of each suit in the hand.
- */
-const ALLOW_ACE_MARRIAGE = true;
+import { SUITS, RANKS, POINTS, MARRIAGE_POINTS, MARRIAGE_ACE_POINTS } from "./constants.ts";
+import { DEFAULT_GAME_RULES } from "./settings.ts";
+import type { GameRules } from "./settings.ts";
 
 type Suit = (typeof SUITS)[keyof typeof SUITS];
 
@@ -208,14 +168,14 @@ function findAceMarriage(hand: Card[]): boolean {
  * Does not represent actually earned points because marriages are not guaranteed.
  * If ALLOW_ACE_MARRIAGE is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
  */
-function getCardsPointsWithMarriages(hand: Card[]): number {
+function getCardsPointsWithMarriages(hand: Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
     const marriages = findMarriages(hand);
     let points = 0;
 
     for (const suit of marriages)
         points += getMarriagePoints(suit);
 
-    if (ALLOW_ACE_MARRIAGE && findAceMarriage(hand))
+    if (rules.allowAceMarriage && findAceMarriage(hand))
         points += MARRIAGE_ACE_POINTS;
 
     return points + getCardsPoints(hand);
@@ -232,46 +192,6 @@ function compareCards(cardA: Card, cardB: Card, trump: Suit | null): boolean {
 }
 
 /**
- * Обязательно класть козырь?
- * true — Если нет карты нужной масти, но есть козырь, игрок обязан положить козырь.
- * false — Если нет карты нужной масти, игрок может положить любую карту.
- *
- * Is playing a trump card mandatory?
- * true — If the player cannot follow suit but has a trump card, they must play a trump card.
- * false — If the player cannot follow suit, they may play any card.
- */
-const MUST_TRUMP = true;
-
-/**
- * Разрешить заход с чужого козыря?
- * true — Игрок может открывать взятку козырем, независимо от того, кто его объявил.
- * false — Запрещено открывать взятку чужим козырем, кроме случая, когда в руке остались только козыри. На ответные ходы запрет не распространяется.
- *
- * Allow leading with another player's trump suit?
- * true — The player may lead with a trump card, regardless of who declared the trump suit.
- * false — The player cannot lead with another player's trump suit unless only trump cards remain in hand. This restriction does not apply to following plays.
- */
-const ALLOW_FOREIGN_TRUMP_LEAD = false;
-
-/**
- * Обязательно перебивать?
- * true — Если среди допустимых для хода карт есть карта, способная перебить текущую выигрывающую карту, игрок обязан сыграть одной из таких карт.
- * false — Игрок может сыграть любой допустимой картой, даже если она не перебивает текущую выигрывающую карту.
- *
- * Is beating the current winning card mandatory?
- * true — If any legal card can beat the current winning card, the player must play one of those cards.
- * false — The player may play any legal card, even if it cannot beat the current winning card.
- */
-const MUST_BEAT = true;
-
-/**
- * Обязательно взять хотя бы одну взятку перед объявлением марьяжа?
- *
- * Must win at least one trick before declaring a marriage?
- */
-const REQUIRE_TRICK_BEFORE_MARRIAGE = true;
-
-/**
  * Определяет, какими картами игрок может ходить.
  * Учитывает масть первого хода, козырь и настройки игры.
  *
@@ -285,11 +205,11 @@ const REQUIRE_TRICK_BEFORE_MARRIAGE = true;
  * @param isTrumpOwner - Whether the player declared the current trump. / Является ли игрок владельцем текущего козыря.
  * @returns Array of legal moves. / Массив допустимых ходов.
  */
-function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean): Card[] {
+function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): Card[] {
     if (leadingSuit === null) {
         // (!) If the player is first to play a card
         // > !ALLOW_FOREIGN_TRUMP_LEAD > can't start with another player's trump (because !isTrumpOwner and trump !== null)
-        if (!ALLOW_FOREIGN_TRUMP_LEAD && trump !== null && !isTrumpOwner) {
+        if (!rules.allowForeignTrumpLead && trump !== null && !isTrumpOwner) {
             const legalMoves = hand.filter(card => card.suit !== trump);
 
             // (!) If the player has no cards of a non-trump suit
@@ -306,15 +226,15 @@ function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card
 
     // (!) If the player has no cards of the leading suit
     // > MUST_TRUMP > Must play a trump card if there is one.
-    if (MUST_TRUMP && legalMoves.length === 0 && trump !== null)
+    if (rules.mustTrump && legalMoves.length === 0 && trump !== null)
         legalMoves = hand.filter(card => card.suit === trump);
 
     if (legalMoves.length === 0)
         legalMoves = hand;
 
-    // (!) If must beat the current winning card:
+    // (!) If MUST_BEAT the current winning card:
     // > Find cards that can beat it among the legal moves.
-    if (MUST_BEAT && winningCard !== null) {
+    if (rules.mustBeat && winningCard !== null) {
         const beatingCards = legalMoves.filter(card => compareCards(winningCard, card, trump));
 
         if (beatingCards.length > 0)
@@ -378,7 +298,7 @@ function getTrickPoints(trick: PlayedCard[]): number {
  * @param hasWonTrick - Whether the player has already won a trick in the current round. / Брал ли игрок взятку в текущей раздаче.
  * @returns Whether a marriage can be declared. / Можно ли объявить марьяж.
  */
-function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWonTrick: boolean): boolean {
+function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWonTrick: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): boolean {
     // (!) If the player is not opening the trick:
     // > Cannot declare a marriage.
     if (!isLeading)
@@ -386,7 +306,7 @@ function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWon
 
     // (!) REQUIRE_TRICK_BEFORE_MARRIAGE
     // > Must win at least one trick before declaring a marriage.
-    if (REQUIRE_TRICK_BEFORE_MARRIAGE && !hasWonTrick)
+    if (rules.requireTrickBeforeMarriage && !hasWonTrick)
         return false;
 
     // Check that the selected card is in the player's hand.
@@ -396,7 +316,7 @@ function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWon
     // (!) If the player wants to play an Ace:
     // > ALLOW_ACE_MARRIAGE > Must have all four Aces.
     if (card.rank === RANKS.ACE)
-        return ALLOW_ACE_MARRIAGE && findAceMarriage(hand);
+        return rules.allowAceMarriage && findAceMarriage(hand);
 
     // (!) If the player wants to play a King or Queen:
     // > Must have a marriage of the same suit.

@@ -34,6 +34,18 @@ export const MARRIAGE_POINTS = {
 } as const;
 
 /**
+ * Минимальная ставка.
+ * Minimum bid.
+ */
+export const MIN_BID = 100;
+
+/**
+ * Шаг повышения ставки.
+ * Bid increment.
+ */
+export const BID_STEP = 5;
+
+/**
  * Количество очков за марьяж с тузами.
  * Points for a marriage with Aces.
  */

@@ -69,6 +69,21 @@ export type GameRules = {
     enablePenalties: boolean;
 
     /**
+     * Разрешить блеф при торговле?
+     * Игрок может объявить ставку выше допустимой.
+     * Соперники вправе оспорить ставку.
+     * Если нарушение подтверждается, игрок получает штраф, раздача отменяется, сдающий меняется.
+     * Блеф возможен только при включённой системе штрафов.
+     *
+     * Allow bluffing during bidding?
+     * A player may place a bid above the legal limit.
+     * Opponents may challenge the bid.
+     * If a violation is confirmed, the player receives a penalty, the round is cancelled, and the dealer changes.
+     * Bluffing is only available when penalties are enabled.
+     */
+    allowBidBluff: boolean;
+
+    /**
      * Включить "самосвал"?
      * true - При счёте ровно 555/-555 счёт игрока обнуляется.
      *
@@ -97,6 +112,7 @@ export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     mustBeat: true,
     requireTrickBeforeMarriage: true,
     enablePenalties: true,
+    allowBidBluff: false,
     enableScoreReset: true,
     enableBolts: true
 });

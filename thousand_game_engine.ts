@@ -34,7 +34,13 @@ const MARRIAGE_POINTS = {
 } as const;
 
 const MARRIAGE_ACE_POINTS = 200;
-const useAceMarriage = true;
+
+/**
+ * Можно объявлять марьяж, имея в руке туза каждой масти.
+ * 
+ * Can declare a marriage by having an Ace of each suit in the hand.
+ */
+const ALLOW_ACE_MARRIAGE = true;
 
 type Suit = (typeof SUITS)[keyof typeof SUITS];
 
@@ -200,7 +206,7 @@ function findAceMarriage(hand: Card[]): boolean {
 /**
  * Calculates the total value of a hand including card points and marriage bonuses.
  * Does not represent actually earned points because marriages are not guaranteed.
- * If useAceMarriage is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
+ * If ALLOW_ACE_MARRIAGE is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
  */
 function getCardsPointsWithMarriages(hand: Card[]): number {
     const marriages = findMarriages(hand);
@@ -209,7 +215,7 @@ function getCardsPointsWithMarriages(hand: Card[]): number {
     for (const suit of marriages)
         points += getMarriagePoints(suit);
 
-    if (useAceMarriage && findAceMarriage(hand))
+    if (ALLOW_ACE_MARRIAGE && findAceMarriage(hand))
         points += MARRIAGE_ACE_POINTS;
 
     return points + getCardsPoints(hand);
@@ -257,6 +263,13 @@ const ALLOW_FOREIGN_TRUMP_LEAD = false;
  * false — The player may play any legal card, even if it cannot beat the current winning card.
  */
 const MUST_BEAT = true;
+
+/**
+ * Обязательно взять хотя бы одну взятку перед объявлением марьяжа?
+ *
+ * Must win at least one trick before declaring a marriage?
+ */
+const REQUIRE_TRICK_BEFORE_MARRIAGE = true;
 
 /**
  * Определяет, какими картами игрок может ходить.
@@ -341,4 +354,16 @@ function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | n
             winner = trick[i];
 
     return winner;
+}
+
+/**
+ * Сумма очков во взятке без учёта марьяжей.
+ * Total points in a trick without marriages.
+ *
+ * @param trick - Played cards. / Сыгранные во взятке карты.
+ * @returns Total points. / Сумма очков.
+ */
+function getTrickPoints(trick: PlayedCard[]): number {
+    let points = trick.map(pc => pc.card)
+    return getCardsPoints(points);
 }

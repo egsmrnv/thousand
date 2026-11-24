@@ -15,7 +15,7 @@ At a three-player table everyone plays. At a four-player table the dealer sits o
 1. **Bid for the talon.** Bidding opens at 100. A bid is a promise to earn points in this deal. In the default rules the bid limit is 120 plus the value of the marriages in the bidder’s hand.
 2. **Set the contract.** The winner takes the talon, gives one card to each opponent, and names a final contract at least as high as the winning bid. Each active player now holds eight cards.
 3. **Play eight tricks.** The bidder leads first. Each player plays one card, following suit when possible. The winner collects the cards and leads next. The deck is worth 120 points. Declaring a king and queen of the same suit when leading earns a bonus and makes their suit trump. By default the player must already have won a trick to do this.
-4. **Keep score across deals.** Reaching 880 puts a player on the *barrel*. To win from there they must win the auction and fulfil a contract of at least 120 in one deal. They have three attempts.
+4. **Keep score across deals.** Reaching 880 puts a player on the *barrel*. They may still bid below 120. If they win the auction, their final contract must be at least 120 and at least their winning bid. They have three attempts to win the auction and fulfil that contract in one deal.
 
 The Russian [rules specification](./RULES.md) covers exceptions such as redeals, optional bid challenges and conceding a contract. Its version number (v1.0) identifies the rules edition. The [open questions](./RULES.md#17-открытые-вопросы) include the proposed two-player variant and how to settle simultaneous scoring events.
 
@@ -75,7 +75,7 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 1. **Торги за прикуп.** Первый игрок объявляет 100. Ставкой игрок указывает, сколько очков берётся набрать за раздачу. По стандартным правилам предел ставки — 120 плюс стоимость марьяжей в руке участника торгов.
 2. **Заказ.** Победитель торгов забирает прикуп, отдаёт по одной карте каждому сопернику и объявляет окончательный заказ. Заказ должен быть не ниже выигранной ставки. У каждого из троих теперь по восемь карт.
 3. **Восемь взяток.** Первым заходит заказчик. Каждый кладёт одну карту, по возможности в масть захода. Победитель забирает взятку и заходит следующим. Все карты колоды вместе стоят 120 очков. Игрок с королём и дамой одной масти может на своём заходе сыграть одну из этих карт и объявить марьяж. Он получает бонус, а масть становится козырной. По стандартным правилам для объявления нужно уже взять хотя бы одну взятку в этой раздаче.
-4. **Бочка и победа.** Когда игрок набирает 880 очков или больше, его счёт фиксируется на 880 — игрок попадает на бочку. У него три попытки, чтобы выиграть торги и в той же раздаче выполнить заказ хотя бы на 120 очков.
+4. **Бочка и победа.** Когда игрок набирает 880 очков или больше, его счёт фиксируется на 880 — игрок попадает на бочку. Он по-прежнему может торговаться ниже 120. Если он выигрывает торги, его окончательный заказ должен быть не ниже 120 и не ниже выигранной ставки. У игрока три попытки, чтобы выиграть торги и выполнить свой заказ в той же раздаче.
 
 В [правилах игры](./RULES.md) описаны пересдачи, оспаривание ставки при включённом блефе и роспись, при которой заказчик отказывается от розыгрыша. Номер v1.0 относится к редакции правил. Вариант на двоих и порядок расчёта при нескольких одновременных событиях ещё обсуждаются. [Открытые вопросы](./RULES.md#17-открытые-вопросы)
 

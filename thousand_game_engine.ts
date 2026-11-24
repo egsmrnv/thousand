@@ -26,6 +26,16 @@ const POINTS = {
     [RANKS.NINE]: 0
 } as const;
 
+const MARRIAGE_POINTS = {
+    [SUITS.HEARTS]: 100,
+    [SUITS.DIAMONDS]: 80,
+    [SUITS.CLUBS]: 60,
+    [SUITS.SPADES]: 40
+} as const;
+
+const MARRIAGE_ACE_POINTS = 200;
+const useAceMarriage = true;
+
 type Suit = (typeof SUITS)[keyof typeof SUITS];
 
 type Rank = (typeof RANKS)[keyof typeof RANKS];
@@ -41,6 +51,23 @@ function getCardId(card: Card): number {
 
 function getCardPoints(card: Card): number {
     return POINTS[card.rank];
+}
+
+function getCardsPoints(cards: Card[]): number {
+    let result = 0;
+    for (const card of cards)
+        result += getCardPoints(card);
+
+    return result;
+}
+
+/**
+ * 
+ * @param suit - Get points of marriage of given suit
+ * @returns - Point for marriage of given suit
+ */
+function getMarriagePoints(suit: Suit): number {
+    return MARRIAGE_POINTS[suit];
 }
 
 /**
@@ -134,4 +161,56 @@ function validateDeal(hands: Card[][], talon: Card[], handCount: 3 | 4): boolean
 
     // combine all cards via [...hands.flat() - from hands, ...talon - from talon]
     return validateDeck([...hands.flat(), ...talon]);
+}
+
+/**
+ * Finds all standard (without Aces) marriages in a hand.
+ * A marriage consists of a king and a queen of the same suit.
+*/
+function findMarriages(hand: Card[]): Suit[] {
+    const marriages: Suit[] = [];
+
+    for (const suit of Object.values(SUITS)) {
+        // if there is a king of current suit in the hand
+        const hasKing = hand.some(
+            card => card.suit === suit &&
+                    card.rank === RANKS.KING
+        );
+
+        // if there is a queen of current suit in the hand
+        const hasQueen = hand.some(
+            card => card.suit === suit &&
+                    card.rank === RANKS.QUEEN
+        );
+
+        if (hasKing && hasQueen)
+            marriages.push(suit);
+    }
+
+    return marriages;
+}
+
+/**
+ * Checks whether the hand contains an ace of every suit
+ */
+function findAceMarriage(hand: Card[]): boolean {
+    return Object.values(SUITS).every(s => hand.some(card => card.rank === RANKS.ACE && card.suit === s))
+}
+
+/**
+ * Calculates the total value of a hand including card points and marriage bonuses.
+ * Does not represent actually earned points because marriages are not guaranteed.
+ * If useAceMarriage is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
+ */
+function getCardsPointsWithMarriages(hand: Card[]): number {
+    const marriages = findMarriages(hand);
+    let points = 0;
+
+    for (const suit of marriages)
+        points += getMarriagePoints(suit);
+
+    if (useAceMarriage && findAceMarriage(hand))
+        points += MARRIAGE_ACE_POINTS;
+
+    return points + getCardsPoints(hand);
 }

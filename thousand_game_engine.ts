@@ -367,3 +367,41 @@ function getTrickPoints(trick: PlayedCard[]): number {
     let points = trick.map(pc => pc.card)
     return getCardsPoints(points);
 }
+
+/**
+ * Может ли игрок объявить марьяж.
+ * Checks whether the player can declare a marriage.
+
+ * @param hand - Cards in the player's hand. / Карты в руке игрока.
+ * @param card - Card the player wants to play. / Карта, которой игрок хочет походить.
+ * @param isLeading - Whether the player is opening the trick. / Открывает ли игрок взятку.
+ * @param hasWonTrick - Whether the player has already won a trick in the current round. / Брал ли игрок взятку в текущей раздаче.
+ * @returns Whether a marriage can be declared. / Можно ли объявить марьяж.
+ */
+function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWonTrick: boolean): boolean {
+    // (!) If the player is not opening the trick:
+    // > Cannot declare a marriage.
+    if (!isLeading)
+        return false;
+
+    // (!) REQUIRE_TRICK_BEFORE_MARRIAGE
+    // > Must win at least one trick before declaring a marriage.
+    if (REQUIRE_TRICK_BEFORE_MARRIAGE && !hasWonTrick)
+        return false;
+
+    // Check that the selected card is in the player's hand.
+    if (!hand.some(c => getCardId(c) === getCardId(card)))
+        return false;
+
+    // (!) If the player wants to play an Ace:
+    // > ALLOW_ACE_MARRIAGE > Must have all four Aces.
+    if (card.rank === RANKS.ACE)
+        return ALLOW_ACE_MARRIAGE && findAceMarriage(hand);
+
+    // (!) If the player wants to play a King or Queen:
+    // > Must have a marriage of the same suit.
+    if (card.rank === RANKS.KING || card.rank === RANKS.QUEEN)
+        return findMarriages(hand).includes(card.suit);
+
+    return false;
+}

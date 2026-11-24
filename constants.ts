@@ -87,3 +87,17 @@ export const CUT_PENALTY_LIMIT = 3;
  * Number of accumulated bolts before a penalty is applied.
  */
 export const BOLT_PENALTY_LIMIT = 3;
+
+/**
+ * Минимальное количество очков в руке, чтобы не было пересдачи по очкам.
+ *
+ * Minimum card points in a hand required to prevent a point-based redeal.
+ */
+export const MIN_HAND_POINTS = 14;
+
+/**
+ * Минимальное количество очков в прикупе, чтобы не было пересдачи по очкам.
+ *
+ * Minimum card points in the talon required to prevent a point-basedredeal.
+ */
+export const MIN_TALON_POINTS = 5;

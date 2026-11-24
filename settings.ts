@@ -1,8 +1,16 @@
 export type GameRules = {
     /**
      * Разрешить пересдачу карт при определённых условиях?
+     * - 4x9 Четыре девятки в руке.
+     * - 4xJ Четыре валета в руке.
+     * - Менее MIN_HAND_POINTS в руке.
+     * - Менее MIN_TALON_POINTS в прикупе.
      *
      * Allow redealing cards under certain conditions?
+     * - 4x9 Four Nines in the hand.
+     * - 4xJ Four Jacks in the hand.
+     * - Fewer than MIN_HAND_POINTS in the hand.
+     * - Fewer than MIN_TALON_POINTS in the talon.
      */
     allowRedeal: boolean;
 
@@ -72,7 +80,7 @@ export type GameRules = {
     /**
      * Включить правило болтов? Болт начисляется если в раздаче игрок не взял ни одной взятки.
      *
-     * Enable the "bolts" rule? A bolt is counts if the player does not win any tricks in a round.
+     * Enable the "bolts" rule? A bolt counts if the player does not win any tricks in a round.
      */
     enableBolts: boolean;
 };

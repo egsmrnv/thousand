@@ -245,8 +245,8 @@ function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card
 }
 
 // ##############
-// Next, we start defining the logic for played cards and tricks.
-// Далее начинаем прописывать логику сыгранных карт и взяток.
+// Logic for played cards and tricks.
+// Логика сыгранных карт и взяток.
 // ##############
 
 /**
@@ -325,3 +325,9 @@ function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWon
 
     return false;
 }
+
+// ##############
+// Logic for game phases, rounds, and states.
+// Логика игровых фаз, раундов и состояний.
+// ##############
+

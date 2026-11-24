@@ -1,5 +1,12 @@
 export type GameRules = {
     /**
+     * Разрешить пересдачу карт при определённых условиях?
+     *
+     * Allow redealing cards under certain conditions?
+     */
+    allowRedeal: boolean;
+
+    /**
      * Можно объявлять марьяж, имея в руке туза каждой масти.
      *
      * Can declare a marriage by having an Ace of each suit in the hand.
@@ -8,34 +15,34 @@ export type GameRules = {
 
     /**
      * Обязательно класть козырь?
-     * true — Если нет карты нужной масти, но есть козырь, игрок обязан положить козырь.
-     * false — Если нет карты нужной масти, игрок может положить любую карту.
+     * true - Если нет карты нужной масти, но есть козырь, игрок обязан положить козырь.
+     * false - Если нет карты нужной масти, игрок может положить любую карту.
      *
      * Is playing a trump card mandatory?
-     * true — If the player cannot follow suit but has a trump card, they must play a trump card.
-     * false — If the player cannot follow suit, they may play any card.
+     * true - If the player cannot follow suit but has a trump card, they must play a trump card.
+     * false - If the player cannot follow suit, they may play any card.
      */
     mustTrump: boolean;
 
     /**
      * Разрешить заход с чужого козыря?
-     * true — Игрок может открывать взятку козырем, независимо от того, кто его объявил.
-     * false — Запрещено открывать взятку чужим козырем, кроме случая, когда в руке остались только козыри. На ответные ходы запрет не распространяется.
+     * true - Игрок может открывать взятку козырем, независимо от того, кто его объявил.
+     * false - Запрещено открывать взятку чужим козырем, кроме случая, когда в руке остались только козыри. На ответные ходы запрет не распространяется.
      *
      * Allow leading with another player's trump suit?
-     * true — The player may lead with a trump card, regardless of who declared the trump suit.
-     * false — The player cannot lead with another player's trump suit unless only trump cards remain in hand. This restriction does not apply to following plays.
+     * true - The player may lead with a trump card, regardless of who declared the trump suit.
+     * false - The player cannot lead with another player's trump suit unless only trump cards remain in hand. This restriction does not apply to following plays.
      */
     allowForeignTrumpLead: boolean;
 
     /**
      * Обязательно перебивать?
-     * true — Если среди допустимых для хода карт есть карта, способная перебить текущую выигрывающую карту, игрок обязан сыграть одной из таких карт.
-     * false — Игрок может сыграть любой допустимой картой, даже если она не перебивает текущую выигрывающую карту.
+     * true - Если среди допустимых для хода карт есть карта, способная перебить текущую выигрывающую карту, игрок обязан сыграть одной из таких карт.
+     * false - Игрок может сыграть любой допустимой картой, даже если она не перебивает текущую выигрывающую карту.
      *
      * Is beating the current winning card mandatory?
-     * true — If any legal card can beat the current winning card, the player must play one of those cards.
-     * false — The player may play any legal card, even if it cannot beat the current winning card.
+     * true - If any legal card can beat the current winning card, the player must play one of those cards.
+     * false - The player may play any legal card, even if it cannot beat the current winning card.
      */
     mustBeat: boolean;
 
@@ -45,6 +52,29 @@ export type GameRules = {
      * Must win at least one trick before declaring a marriage?
      */
     requireTrickBeforeMarriage: boolean;
+
+    /**
+     * Включить систему штрафов за нарушение правил игры?
+     *
+     * Enable penalties for violating game rules?
+     */
+    enablePenalties: boolean;
+
+    /**
+     * Включить "самосвал"?
+     * true - При счёте ровно 555/-555 счёт игрока обнуляется.
+     *
+     * Enable the score reset rule?
+     * true - If the player's score reaches exactly 555/-555, the score resets to zero.
+     */
+    enableScoreReset: boolean;
+
+    /**
+     * Включить правило болтов? Болт начисляется если в раздаче игрок не взял ни одной взятки.
+     *
+     * Enable the "bolts" rule? A bolt is counts if the player does not win any tricks in a round.
+     */
+    enableBolts: boolean;
 };
 
 /**
@@ -52,11 +82,15 @@ export type GameRules = {
  * Default game rules.
  */
 export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
+    allowRedeal: true,
     allowAceMarriage: true,
     mustTrump: true,
     allowForeignTrumpLead: false,
     mustBeat: true,
-    requireTrickBeforeMarriage: true
+    requireTrickBeforeMarriage: true,
+    enablePenalties: true,
+    enableScoreReset: true,
+    enableBolts: true
 });
 
 /**

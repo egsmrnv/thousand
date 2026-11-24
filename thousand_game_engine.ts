@@ -310,3 +310,35 @@ function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card
 
     return legalMoves;
 }
+
+// ##############
+// Next, we start defining the logic for played cards and tricks.
+// Далее начинаем прописывать логику сыгранных карт и взяток.
+// ##############
+
+/**
+ * Card played by a player in a trick. / Сыгранная карта во взятке.
+*/
+type PlayedCard = {
+    readonly playerId: number;
+    readonly card: Card;
+};
+
+/**
+ * Determines the winner of a trick based on the cards played (trick) and the trump suit (trump, null if no trump).
+ * @param trick Array of cards played in the trick. / Массив сыгранных во взятке карт.
+ * @param trump The trump suit for the current round. / Масть козыря для текущего раунда.
+ * @returns The winning card or null if the trick is empty. / Выигрывающая карта или null, если массив trick пуст.
+ */
+function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | null {
+    if (trick.length === 0)
+        return null;
+    let winner = trick[0];
+
+    // Compare each played card with the current winning card.
+    for (let i = 1; i < trick.length; i++)
+        if (compareCards(winner.card, trick[i].card, trump))
+            winner = trick[i];
+
+    return winner;
+}

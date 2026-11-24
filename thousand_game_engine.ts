@@ -183,7 +183,7 @@ function getCardsPointsWithMarriages(hand: Card[], rules: Readonly<GameRules> = 
 
 /**
  * @param challenger Card challenging the current winner (if it wins return true). / Карта которая будет сравниваться с текущей (если она будет сильнее то true)
- * @param currentWinner Current winning card. / Текущая  карта 
+ * @param currentWinner Current winning card. / Текущая  карта, которая пока выигрывает взятку
  * @param trump Current trump suit (null if no trump). Козырная масть (null если нет козыря)
  * @returns True if the challenger beats the current winner, false otherwise. / Возвращает true, если новая карта (challenger) побеждает текущую выигрывающую карту, false в противном случае.
  */

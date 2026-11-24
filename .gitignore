@@ -23,3 +23,5 @@ out/
 
 # Testing
 coverage/
+
+/AGENTS.md

@@ -182,13 +182,13 @@ function getCardsPointsWithMarriages(hand: Card[], rules: Readonly<GameRules> = 
 }
 
 /**
- * @param cardA (current card) If it wins, function returns <false>
- * @param cardB (challenging card) If it wins, function returns <true>
- * @param trump Current trump suit (null if no trump)
- * @returns True if cardB wins over cardA, false otherwise
+ * @param challenger Card challenging the current winner (if it wins return true). / Карта которая будет сравниваться с текущей (если она будет сильнее то true)
+ * @param currentWinner Current winning card. / Текущая  карта 
+ * @param trump Current trump suit (null if no trump). Козырная масть (null если нет козыря)
+ * @returns True if the challenger beats the current winner, false otherwise. / Возвращает true, если новая карта (challenger) побеждает текущую выигрывающую карту, false в противном случае.
  */
-function compareCards(cardA: Card, cardB: Card, trump: Suit | null): boolean {
-    return (cardA.suit === cardB.suit && cardA.rank > cardB.rank) || (trump !== null && cardB.suit === trump && cardA.suit !== trump);
+function beats(challenger: Card, currentWinner: Card, trump: Suit | null): boolean {
+    return (challenger.suit === currentWinner.suit && challenger.rank < currentWinner.rank) || (trump !== null && challenger.suit === trump && currentWinner.suit !== trump);
 }
 
 /**
@@ -235,7 +235,7 @@ function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card
     // (!) If MUST_BEAT the current winning card:
     // > Find cards that can beat it among the legal moves.
     if (rules.mustBeat && winningCard !== null) {
-        const beatingCards = legalMoves.filter(card => compareCards(winningCard, card, trump));
+        const beatingCards = legalMoves.filter(card => beats(card, winningCard, trump));
 
         if (beatingCards.length > 0)
             legalMoves = beatingCards;
@@ -270,7 +270,7 @@ function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | n
 
     // Compare each played card with the current winning card.
     for (let i = 1; i < trick.length; i++)
-        if (compareCards(winner.card, trick[i].card, trump))
+        if (beats(trick[i].card, winner.card, trump))
             winner = trick[i];
 
     return winner;
@@ -284,8 +284,8 @@ function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | n
  * @returns Total points. / Сумма очков.
  */
 function getTrickPoints(trick: PlayedCard[]): number {
-    let points = trick.map(pc => pc.card)
-    return getCardsPoints(points);
+    const cards = trick.map(play => play.card)
+    return getCardsPoints(cards);
 }
 
 /**

@@ -214,3 +214,99 @@ function getCardsPointsWithMarriages(hand: Card[]): number {
 
     return points + getCardsPoints(hand);
 }
+
+/**
+ * @param cardA (current card) If it wins, function returns <false>
+ * @param cardB (challenging card) If it wins, function returns <true>
+ * @param trump Current trump suit (null if no trump)
+ * @returns True if cardB wins over cardA, false otherwise
+ */
+function compareCards(cardA: Card, cardB: Card, trump: Suit | null): boolean {
+    return (cardA.suit === cardB.suit && cardA.rank > cardB.rank) || (trump !== null && cardB.suit === trump && cardA.suit !== trump);
+}
+
+/**
+ * Обязательно класть козырь?
+ * true — Если нет карты нужной масти, но есть козырь, игрок обязан положить козырь.
+ * false — Если нет карты нужной масти, игрок может положить любую карту.
+ *
+ * Is playing a trump card mandatory?
+ * true — If the player cannot follow suit but has a trump card, they must play a trump card.
+ * false — If the player cannot follow suit, they may play any card.
+ */
+const MUST_TRUMP = true;
+
+/**
+ * Разрешить заход с чужого козыря?
+ * true — Игрок может открывать взятку козырем, независимо от того, кто его объявил.
+ * false — Запрещено открывать взятку чужим козырем, кроме случая, когда в руке остались только козыри. На ответные ходы запрет не распространяется.
+ *
+ * Allow leading with another player's trump suit?
+ * true — The player may lead with a trump card, regardless of who declared the trump suit.
+ * false — The player cannot lead with another player's trump suit unless only trump cards remain in hand. This restriction does not apply to following plays.
+ */
+const ALLOW_FOREIGN_TRUMP_LEAD = false;
+
+/**
+ * Обязательно перебивать?
+ * true — Если среди допустимых для хода карт есть карта, способная перебить текущую выигрывающую карту, игрок обязан сыграть одной из таких карт.
+ * false — Игрок может сыграть любой допустимой картой, даже если она не перебивает текущую выигрывающую карту.
+ *
+ * Is beating the current winning card mandatory?
+ * true — If any legal card can beat the current winning card, the player must play one of those cards.
+ * false — The player may play any legal card, even if it cannot beat the current winning card.
+ */
+const MUST_BEAT = true;
+
+/**
+ * Определяет, какими картами игрок может ходить.
+ * Учитывает масть первого хода, козырь и настройки игры.
+ *
+ * Finds all cards the player is allowed to play.
+ * Takes into account the leading suit, trump and game rules.
+ *
+ * @param hand - Cards in the player's hand. / Карты в руке игрока.
+ * @param leadingSuit - Suit of the first card in the trick. / Масть первой карты во взятке.
+ * @param winningCard - Current winning card in the trick. / Текущая выигрывающая карта во взятке.
+ * @param trump - Current trump suit (null if no trump). / Текущая масть козыря (null если нет козыря).
+ * @param isTrumpOwner - Whether the player declared the current trump. / Является ли игрок владельцем текущего козыря.
+ * @returns Array of legal moves. / Массив допустимых ходов.
+ */
+function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean): Card[] {
+    if (leadingSuit === null) {
+        // (!) If the player is first to play a card
+        // > !ALLOW_FOREIGN_TRUMP_LEAD > must play a card of the leading suit if not an owner of the leading trump suit.
+        if (!ALLOW_FOREIGN_TRUMP_LEAD && trump !== null && !isTrumpOwner) {
+            const legalMoves = hand.filter(card => card.suit !== trump);
+
+            // (!) If the player has no cards of a non-trump suit
+            // > can play any card from their hand.
+            return legalMoves.length > 0 ? legalMoves : hand;
+        }
+
+        return hand;
+    }
+
+    // (!) If the player is not first to play a card
+    // > must play a card of the leading suit.
+    let legalMoves = hand.filter(card => card.suit === leadingSuit);
+
+    // (!) If the player has no cards of the leading suit
+    // > MUST_TRUMP > Must play a trump card if there is one.
+    if (MUST_TRUMP && legalMoves.length === 0 && trump !== null)
+        legalMoves = hand.filter(card => card.suit === trump);
+
+    if (legalMoves.length === 0)
+        legalMoves = hand;
+
+    // (!) If must beat the current winning card:
+    // > Find cards that can beat it among the legal moves.
+    if (MUST_BEAT && winningCard !== null) {
+        const beatingCards = legalMoves.filter(card => compareCards(winningCard, card, trump));
+
+        if (beatingCards.length > 0)
+            legalMoves = beatingCards;
+    }
+
+    return legalMoves;
+}

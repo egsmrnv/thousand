@@ -275,7 +275,7 @@ const MUST_BEAT = true;
 function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean): Card[] {
     if (leadingSuit === null) {
         // (!) If the player is first to play a card
-        // > !ALLOW_FOREIGN_TRUMP_LEAD > must play a card of the leading suit if not an owner of the leading trump suit.
+        // > !ALLOW_FOREIGN_TRUMP_LEAD > can't start with another player's trump (because !isTrumpOwner and trump !== null)
         if (!ALLOW_FOREIGN_TRUMP_LEAD && trump !== null && !isTrumpOwner) {
             const legalMoves = hand.filter(card => card.suit !== trump);
 

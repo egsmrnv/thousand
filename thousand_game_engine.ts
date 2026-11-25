@@ -19,7 +19,7 @@ function getCardPoints(card: Card): number {
     return POINTS[card.rank];
 }
 
-function getCardsPoints(cards: Card[]): number {
+function getCardsPoints(cards: readonly Card[]): number {
     let result = 0;
     for (const card of cards)
         result += getCardPoints(card);
@@ -54,7 +54,7 @@ function createDeck(): Card[] {
 /**
  * Check that deck is valid (cards count and ID uniqueness)
  */
-function validateDeck(deck: Card[]): boolean {
+function validateDeck(deck: readonly Card[]): boolean {
     const expectedCardCount = Object.keys(SUITS).length * Object.keys(RANKS).length;
     return deck.length === expectedCardCount && (new Set(deck.map(getCardId))).size === expectedCardCount
 }
@@ -68,7 +68,7 @@ function validateDeck(deck: Card[]): boolean {
  * Source: CC BY-SA 4.0
  * https://creativecommons.org/licenses/by-sa/4.0/
  */
-function shuffleDeck(deck: Card[]): Card[] {
+function shuffleDeck(deck: readonly Card[]): Card[] {
     const deckCopy = [...deck];
 
     for (let i = deckCopy.length - 1; i > 0; i--) {
@@ -84,7 +84,7 @@ function shuffleDeck(deck: Card[]): Card[] {
  * The remaining cards go to the talon.
  * Does not mutate the original deck.
  */
-function dealCards(deck: Card[], handCount: 3 | 4): {
+function dealCards(deck: readonly Card[], handCount: 3 | 4): {
     hands: Card[][];
     talon: Card[];
 } {
@@ -115,7 +115,7 @@ function dealCards(deck: Card[], handCount: 3 | 4): {
  * @param handCount - Number of hands (3 or 4).
  * @returns True if the deal is valid.
  */
-function validateDeal(hands: Card[][], talon: Card[], handCount: 3 | 4): boolean {
+function validateDeal(hands: readonly (readonly Card[])[], talon: readonly Card[], handCount: 3 | 4): boolean {
     if(hands.length !== handCount || talon.length !== handCount)
         return false;
     
@@ -133,7 +133,7 @@ function validateDeal(hands: Card[][], talon: Card[], handCount: 3 | 4): boolean
  * Finds all standard (without Aces) marriages in a hand.
  * A marriage consists of a king and a queen of the same suit.
 */
-function findMarriages(hand: Card[]): Suit[] {
+function findMarriages(hand: readonly Card[]): Suit[] {
     const marriages: Suit[] = [];
 
     for (const suit of Object.values(SUITS)) {
@@ -159,7 +159,7 @@ function findMarriages(hand: Card[]): Suit[] {
 /**
  * Checks whether the hand contains an ace of every suit
  */
-function findAceMarriage(hand: Card[]): boolean {
+function findAceMarriage(hand: readonly Card[]): boolean {
     return Object.values(SUITS).every(s => hand.some(card => card.rank === RANKS.ACE && card.suit === s))
 }
 
@@ -168,7 +168,7 @@ function findAceMarriage(hand: Card[]): boolean {
  * Does not represent actually earned points because marriages are not guaranteed.
  * If ALLOW_ACE_MARRIAGE is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
  */
-function getCardsPointsWithMarriages(hand: Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
+function getCardsPointsWithMarriages(hand: readonly Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
     const marriages = findMarriages(hand);
     let points = 0;
 
@@ -263,7 +263,7 @@ type PlayedCard = {
  * @param trump The trump suit for the current round. / Масть козыря для текущего раунда.
  * @returns The winning card or null if the trick is empty. / Выигрывающая карта или null, если массив trick пуст.
  */
-function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | null {
+function getTrickWinner(trick: readonly PlayedCard[], trump: Suit | null): PlayedCard | null {
     if (trick.length === 0)
         return null;
     let winner = trick[0];
@@ -283,7 +283,7 @@ function getTrickWinner(trick: PlayedCard[], trump: Suit | null): PlayedCard | n
  * @param trick - Played cards. / Сыгранные во взятке карты.
  * @returns Total points. / Сумма очков.
  */
-function getTrickPoints(trick: PlayedCard[]): number {
+function getTrickPoints(trick: readonly PlayedCard[]): number {
     const cards = trick.map(play => play.card)
     return getCardsPoints(cards);
 }
@@ -298,7 +298,7 @@ function getTrickPoints(trick: PlayedCard[]): number {
  * @param hasWonTrick - Whether the player has already won a trick in the current round. / Брал ли игрок взятку в текущей раздаче.
  * @returns Whether a marriage can be declared. / Можно ли объявить марьяж.
  */
-function canDeclareMarriage(hand: Card[], card: Card, isLeading: boolean, hasWonTrick: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): boolean {
+function canDeclareMarriage(hand: readonly Card[], card: Card, isLeading: boolean, hasWonTrick: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): boolean {
     // (!) If the player is not opening the trick:
     // > Cannot declare a marriage.
     if (!isLeading)

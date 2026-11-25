@@ -205,7 +205,7 @@ function beats(challenger: Card, currentWinner: Card, trump: Suit | null): boole
  * @param isTrumpOwner - Whether the player declared the current trump. / Является ли игрок владельцем текущего козыря.
  * @returns Array of legal moves. / Массив допустимых ходов.
  */
-function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): Card[] {
+function getLegalMoves(hand: readonly Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): readonly Card[] {
     if (leadingSuit === null) {
         // (!) If the player is first to play a card
         // > !ALLOW_FOREIGN_TRUMP_LEAD > can't start with another player's trump (because !isTrumpOwner and trump !== null)
@@ -222,7 +222,7 @@ function getLegalMoves(hand: Card[], leadingSuit: Suit | null, winningCard: Card
 
     // (!) If the player is not first to play a card
     // > must play a card of the leading suit.
-    let legalMoves = hand.filter(card => card.suit === leadingSuit);
+    let legalMoves: readonly Card[] = hand.filter(card => card.suit === leadingSuit);
 
     // (!) If the player has no cards of the leading suit
     // > MUST_TRUMP > Must play a trump card if there is one.

@@ -1,10 +1,12 @@
-import { SUITS, RANKS, POINTS, MARRIAGE_POINTS, MARRIAGE_ACE_POINTS } from "./constants.ts";
+import { SUITS, RANKS, POINTS, MARRIAGE_POINTS, MARRIAGE_ACE_POINTS, GAME_PHASES } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
 
 type Suit = (typeof SUITS)[keyof typeof SUITS];
 
 type Rank = (typeof RANKS)[keyof typeof RANKS];
+
+type GamePhase = (typeof GAME_PHASES)[keyof typeof GAME_PHASES];
 
 type Card = {
     readonly suit: Suit;
@@ -331,3 +333,24 @@ function canDeclareMarriage(hand: readonly Card[], card: Card, isLeading: boolea
 // Логика игровых фаз, раундов и состояний.
 // ##############
 
+type PlayerState = {
+    readonly id: number,
+    hand: readonly Card[],
+    totalPoints: number,
+    roundPoints: number,
+    tricksWon: number,
+    bolts: number,
+    barrelAttemptsUsed:	number
+};
+
+type TrumpState = {
+    readonly suit: Suit;
+    readonly playerId: number;
+} | {
+    readonly suit: null;
+    readonly playerId: null;
+};
+
+type GameState = {
+    // Your code
+};

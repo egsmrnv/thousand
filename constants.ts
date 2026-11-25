@@ -34,6 +34,30 @@ export const MARRIAGE_POINTS = {
 } as const;
 
 /**
+ * 0.WAITING - Ожидание начала партии / Waiting for start
+ * 1.CUTTING - Перемешивание и снятие колоды / Mixing and deck cutting
+ * 2.DEALING - Раздача карт / Card dealing
+ * 3.BIDDING - Торговля и оспаривание ставок
+ * 4.EXCHANGING - Получение прикупа и передача карт
+ * 5.CONTRACT - Объявление окончательного заказа
+ * 6.PLAYING - Розыгрыш взяток
+ * 7.SCORING - Запись очков и обработка результатов
+ * 8.FINISHED - Партия завершена
+ */
+export const GAME_PHASES = {
+    WAITING: 0, 
+    CUTTING: 1, 
+    DEALING: 2,
+    BIDDING: 3,
+    EXCHANGING: 4,
+    CONTRACT: 5,
+    PLAYING: 6,
+    SCORING: 7,
+    FINISHED: 8
+} as const;
+
+
+/**
  * Минимальная ставка.
  * Minimum bid.
  */

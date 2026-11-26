@@ -54,11 +54,23 @@ function createDeck(): Card[] {
 }
 
 /**
- * Check that deck is valid (cards count and ID uniqueness)
+ * Checks that the deck contains every valid suit and rank combination exactly once.
  */
 function validateDeck(deck: readonly Card[]): boolean {
-    const expectedCardCount = Object.keys(SUITS).length * Object.keys(RANKS).length;
-    return deck.length === expectedCardCount && (new Set(deck.map(getCardId))).size === expectedCardCount
+    const suits = Object.values(SUITS);
+    const ranks = Object.values(RANKS);
+    if (deck.length !== suits.length * ranks.length)
+        return false;
+
+    const cardIds = new Set<number>();
+    for (const card of deck) {
+        if (!card || !suits.includes(card.suit) || !ranks.includes(card.rank))
+            return false;
+
+        cardIds.add(getCardId(card));
+    }
+
+    return cardIds.size === deck.length;
 }
 
 /**
@@ -431,10 +443,15 @@ function startRound(game: GameState): void {
     if (game.winnerId !== null)
         throw new Error("The game is already finished.");
 
-    const dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
+    let dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
 
     if (dealerIndex === -1)
         throw new Error("Dealer not found.");
+
+    if (game.phase === GAME_PHASES.SCORING) {
+        dealerIndex = (dealerIndex + 1) % game.players.length;
+        game.dealerId = game.players[dealerIndex].id;
+    }
 
     const cutterIndex = (dealerIndex + 1) % game.players.length;
     const cutter = game.players[cutterIndex];

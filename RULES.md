@@ -609,4 +609,4 @@ const canBluff = rules.enablePenalties && rules.allowBidBluff;
 
 ## Источники
 
-- Имена, числовые параметры и значения настроек в коде. [constants.ts](./constants.ts), [settings.ts](./settings.ts), [thousand_game_engine.ts](./thousand_game_engine.ts)
+- Игровые величины и настройки партии приведены в [constants.ts](./constants.ts) и [settings.ts](./settings.ts). Начало раздачи и снятие колоды реализованы в [thousand_game_engine.ts](./thousand_game_engine.ts).

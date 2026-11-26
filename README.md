@@ -14,19 +14,28 @@ At 880 a player enters the *barrel*. They can still bid below 120, but their fin
 
 ### What works today
 
-- **Game state.** `createGame()` initializes two, three or four players in `WAITING` at round zero. Player 0 is the initial dealer in the implementation. Hands, deck and talon start empty. `GameState` tracks the turn, trump and its owner, the current trick and the winner. Each player has a score, round points, tricks won, bolts and barrel attempts used.
-- **Starting a round.** `startRound()` prepares the deck and assigns the cutter. After scoring, the next player deals. `cutDeck()` handles retries and cut penalties. A successful cut moves the game to `DEALING`.
-- **Cards and tricks.** The engine creates, shuffles and validates a deck, deals hands, finds legal moves, checks marriage declarations and calculates trick winners and points.
+- `createGame()` initializes two, three or four players at round zero in `WAITING`. Scores and counters start at zero, hands are empty, and player 0 is the first dealer.
+- `startRound()` shuffles the deck and assigns the cutter. After scoring, the next player deals. `cutDeck()` handles retries and penalties, then moves the game to `DEALING` on a successful cut.
+- Individual functions can deal and validate hands, detect marriages, find legal moves and determine a trick’s winner and points.
 
 ### Roadmap
 
-Next, assign the three hands and the talon from `dealCards(deck, 3)` to the game state. With four players the dealer sits out. With two, the third hand stays face down, separate from the talon. The [two-player exchange and scoring rules](./RULES.md#171-вариант-на-двоих-с-неиграющей-рукой) are under discussion. Bidding, contract settlement and automated tests are also ahead. Later plans include a React interface with animated SVG cards, computer opponents and online play using the same engine.
+Next, assign the three hands and the talon from `dealCards(deck, 3)` to the game state. With four players the dealer sits out. With two, the third hand stays face down, separate from the talon. The [two-player exchange and scoring rules](./RULES.md#171-вариант-на-двоих-с-неиграющей-рукой) are under discussion. Later milestones include bidding, scoring, automated tests, a React client with animated SVG cards, computer opponents and online play.
 
 ### Where to work
 
-- [Game engine](./thousand_game_engine.ts) — state types, initialization and card operations.
-- [Constants](./constants.ts) and [settings](./settings.ts) — phases, card values, thresholds and per-game rule switches.
-- [Rules and reference scenarios](./RULES.md#18-контрольные-сценарии) — expected outcomes for future tests.
+Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `createGame()`, `startRound()` and `cutDeck()` to see how the game changes state. Import card, deck and trick operations directly from the modules below.
+
+| Module | What belongs here |
+| --- | --- |
+| [constants.ts](./constants.ts) | Suits, ranks, card and marriage values, phases and fixed thresholds. |
+| [settings.ts](./settings.ts) | House rules, defaults and per-game overrides (`createGameRules`). |
+| [types.ts](./types.ts) | Shared types such as `Card`, `PlayedCard` and `GameState`. |
+| [cards.ts](./cards.ts) | Card points and combinations in a hand. `findMarriages()` finds king–queen pairs. |
+| [deck.ts](./deck.ts) | Create, validate, shuffle and deal a deck. `dealCards()` returns hands and a talon. |
+| [tricks.ts](./tricks.ts) | Which card can be played, whether a marriage can be declared on that play, and who wins the trick. |
+
+[Rules and reference scenarios](./RULES.md#18-контрольные-сценарии) give the expected results for individual plays and deals.
 
 ### Author
 
@@ -51,19 +60,28 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 
 ### Что уже работает
 
-- **Состояние партии.** `createGame()` создаёт двух, трёх или четырёх игроков. Начальная фаза — `WAITING`, номер раздачи — 0. В коде первым сдающим назначается игрок 0. Руки, колода и прикуп пока пусты. В `GameState` предусмотрены очередь хода, козырь и его владелец, текущая взятка и победитель партии. У каждого игрока есть общий счёт, очки и взятки за раздачу, болты и число использованных попыток на бочке.
-- **Начало раздачи.** `startRound()` готовит колоду и назначает снимающего. После подсчёта очков сдаёт следующий игрок. `cutDeck()` обрабатывает повторное снятие и штрафы. Успешное снятие переводит партию в фазу `DEALING`.
-- **Карты и взятки.** Движок создаёт, перемешивает и проверяет колоду, раздаёт карты по рукам, определяет допустимые ходы, проверяет право объявить марьяж, находит победителя взятки и считает её стоимость.
+- `createGame()` создаёт двух, трёх или четырёх игроков в фазе `WAITING`. Номер раздачи, очки и счётчики равны нулю, руки пусты. В коде первым сдаёт игрок 0.
+- `startRound()` перемешивает колоду и назначает снимающего. После подсчёта очков сдаёт следующий игрок. `cutDeck()` обрабатывает повторные снятия и штрафы, а при успешном снятии переводит партию в `DEALING`.
+- Отдельные функции раскладывают карты по рукам, проверяют раздачу, находят марьяжи и допустимые ходы, определяют победителя и стоимость взятки.
 
 ### План разработки
 
-Ближайший шаг — записать три руки и прикуп из `dealCards(deck, 3)` в состояние партии. При игре вчетвером карты получают трое соперников сдающего. Вдвоём третья рука лежит закрытой, отдельно от прикупа. [Обмен и подсчёт очков для двоих](./RULES.md#171-вариант-на-двоих-с-неиграющей-рукой) ещё обсуждаются. Впереди также торги, расчёт контракта и автоматические тесты. Дальше в планах интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети на общем движке.
+Ближайший шаг — записать три руки и прикуп из `dealCards(deck, 3)` в состояние партии. При игре вчетвером карты получают трое соперников сдающего. Вдвоём третья рука лежит закрытой, отдельно от прикупа. [Обмен и подсчёт очков для двоих](./RULES.md#171-вариант-на-двоих-с-неиграющей-рукой) ещё обсуждаются. Дальше в планах торги, подсчёт очков, автотесты, интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети.
 
 ### Файлы проекта
 
-- [Игровой движок](./thousand_game_engine.ts) — типы состояния, создание партии и операции с картами.
-- [Константы](./constants.ts) и [настройки](./settings.ts) — фазы, стоимость карт, пороги и переключатели правил партии.
-- [Правила и контрольные сценарии](./RULES.md#18-контрольные-сценарии) — ожидаемые результаты для будущих тестов.
+Начните с [thousand_game_engine.ts](./thousand_game_engine.ts). По функциям `createGame()`, `startRound()` и `cutDeck()` можно проследить, как меняется состояние партии. Функции для работы с картами, колодой и взятками импортируйте напрямую из модулей ниже.
+
+| Модуль | Что в нём искать |
+| --- | --- |
+| [constants.ts](./constants.ts) | Масти, ранги, стоимость карт и марьяжей, фазы и фиксированные пороги. |
+| [settings.ts](./settings.ts) | Договорные правила, стандартные значения и настройки отдельной партии (`createGameRules`). |
+| [types.ts](./types.ts) | Общие типы, в том числе `Card`, `PlayedCard` и `GameState`. |
+| [cards.ts](./cards.ts) | Карточные очки и комбинации в руке. Например, `findMarriages()` находит пары из короля и дамы. |
+| [deck.ts](./deck.ts) | Создание, проверка, перемешивание и раздача колоды. `dealCards()` возвращает руки и прикуп. |
+| [tricks.ts](./tricks.ts) | Какой картой можно пойти, можно ли объявить марьяж при этом ходе и кто забирает взятку. |
+
+В [контрольных сценариях](./RULES.md#18-контрольные-сценарии) можно сверить ожидаемый результат хода или раздачи.
 
 ### Об авторе
 

@@ -412,3 +412,49 @@ function createGame(
         winnerId: null
     };
 }
+
+/**
+ * Подготавливает новую раздачу.
+ * Prepares a new round.
+ *
+ * @param game - Current game state. / Текущее состояние игры.
+ */
+function startRound(game: GameState): void {
+    if (game.phase !== GAME_PHASES.WAITING && game.phase !== GAME_PHASES.SCORING)
+        throw new Error("Cannot start a round in the current phase.");
+
+    if (game.winnerId !== null)
+        throw new Error("The game is already finished.");
+
+    const dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
+
+    if (dealerIndex === -1)
+        throw new Error("Dealer not found.");
+
+    const cutterIndex = (dealerIndex + 1) % game.players.length;
+    const cutter = game.players[cutterIndex];
+
+    // Reset players round state
+    for (const player of game.players) {
+        player.hand = [];
+        player.roundPoints = 0;
+        player.tricksWon = 0;
+    }
+
+    // Prepare a new deck
+    game.roundNumber++;
+    game.deck = shuffleDeck(createDeck());
+    game.talon = [];
+
+    // Reset trump and current trick
+    game.trump = {
+        suit: null,
+        playerId: null
+    };
+
+    game.currentTrick = [];
+
+    // Start deck cutting phase
+    game.currentPlayerId = cutter.id;
+    game.phase = GAME_PHASES.CUTTING;
+}

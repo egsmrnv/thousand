@@ -352,5 +352,63 @@ type TrumpState = {
 };
 
 type GameState = {
-    // Your code
+    readonly rules: Readonly<GameRules>;
+    players: readonly PlayerState[];
+
+    phase: GamePhase;
+    roundNumber: number;
+
+    deck: readonly Card[];
+    talon: readonly Card[];
+
+    dealerId: number;
+    currentPlayerId: number | null;
+
+    trump: TrumpState;
+    currentTrick: readonly PlayedCard[];
+
+    winnerId: number | null;
 };
+
+/**
+ * Creates the new game with initial state.
+ *
+ * @param playerCount - Number of players. / Количество игроков.
+ * @param rules - Game rules. / Правила игры.
+ * @returns Initial game state. / Начальное состояние игры.
+ */
+function createGame(
+    playerCount: 2 | 3 | 4,
+    rules: Readonly<GameRules> = DEFAULT_GAME_RULES
+): GameState {
+    const players: PlayerState[] = [];
+
+    for (let i = 0; i < playerCount; i++) {
+        players.push({
+            id: i,
+            hand: [],
+            totalPoints: 0,
+            roundPoints: 0,
+            tricksWon: 0,
+            bolts: 0,
+            barrelAttemptsUsed: 0
+        });
+    }
+
+    return {
+        rules: Object.freeze({ ...rules }),
+        players: players,
+        phase: GAME_PHASES.WAITING,
+        roundNumber: 0,
+        deck: [],
+        talon: [],
+        dealerId: players[0].id,
+        currentPlayerId: null,
+        trump: {
+            suit: null,
+            playerId: null
+        },
+        currentTrick: [],
+        winnerId: null
+    };
+}

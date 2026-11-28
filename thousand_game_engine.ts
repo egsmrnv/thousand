@@ -40,6 +40,7 @@ export function createGame(
         rules: Object.freeze({ ...rules }),
         players: players,
         bidding: null,
+        exchange: null,
         phase: GAME_PHASES.WAITING,
         roundNumber: 0,
         cutting: {
@@ -93,8 +94,9 @@ export function startRound(game: GameState): void {
         player.tricksWon = 0;
     }
 
-    // Reset bidding and cutting states
+    // Reset states
     game.bidding = null;
+    game.exchange = null;
 
     game.cutting = {
         jackCount: 0,
@@ -389,6 +391,7 @@ export function restartUnplayedRound(
     game.secondTalon = [];
     game.currentTrick = [];
     game.bidding = null;
+    game.exchange = null;
 
     game.trump = {
         suit: null,

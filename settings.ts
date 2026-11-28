@@ -15,12 +15,6 @@ export type GameRules = {
     allowRedeal: boolean;
 
     /**
-     * Включить «Барабаны»? Каждая разрешённая пересдача расходует один барабан.
-     * Enable drums? Each allowed redeal spends one drum.
-     */
-    enableDrums?: boolean;
-
-    /**
      * Можно объявлять марьяж, имея в руке туза каждой масти.
      *
      * Can declare a marriage by having an Ace of each suit in the hand.
@@ -104,6 +98,18 @@ export type GameRules = {
      * Enable the "bolts" rule? A bolt counts if the player does not win any tricks in a round.
      */
     enableBolts: boolean;
+
+    /**
+     * Включить «Барабаны»? Каждая разрешённая пересдача расходует один барабан. Всего их DRUMS_COUNT в constants.ts
+     * Enable drums? Each allowed redeal spends one drum. Total drum count is DRUMS_COUNT in constants.ts
+     */
+    enableDrums?: boolean;
+
+    /**
+     * Показывать прикуп всем игрокам независимо от торгов?
+     * Always reveal the selected talon to all players (true / false)
+     */
+    alwaysRevealTalon: boolean;
 };
 
 /**
@@ -112,7 +118,6 @@ export type GameRules = {
  */
 export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     allowRedeal: true,
-    enableDrums: false,
     allowAceMarriage: true,
     mustTrump: true,
     allowForeignTrumpLead: false,
@@ -121,7 +126,9 @@ export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     enablePenalties: true,
     allowBidBluff: false,
     enableScoreReset: true,
-    enableBolts: true
+    enableBolts: true,
+    enableDrums: false,
+    alwaysRevealTalon: false
 });
 
 /**

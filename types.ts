@@ -45,6 +45,7 @@ export type GameState = {
     cutting: CuttingState;
 
     bidding: BiddingState | null;
+    exchange: ExchangeState | null;
 
     phase: GamePhase;
     roundNumber: number;
@@ -92,4 +93,22 @@ export type BiddingState = {
     passedPlayerIds: readonly number[];
     hasRaised: boolean;
     challengeOpen: boolean;
+};
+
+/**
+ * Состояние получения прикупа и обмена картами.
+ */
+export type ExchangeState = {
+    readonly talonIndex: 0 | 1;
+    readonly selectedTalon: readonly Card[];
+    readonly dealerTalonPoints: number;
+};
+
+/**
+ * Карта, передаваемая сопернику.
+ * Card transferred to an opponent.
+ */
+export type CardTransfer = {
+    readonly recipientId: number;
+    readonly card: Card;
 };

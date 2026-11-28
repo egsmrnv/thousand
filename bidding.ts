@@ -54,31 +54,18 @@ export function startBidding(game: GameState): void {
  */
 export function raiseBid(game: GameState, playerId: number, amount: number): void {
     const bidding = game.bidding;
-    if (game.phase !== GAME_PHASES.BIDDING || bidding === null)
-        throw new Error("Bidding is not active.");
 
-    const bidders = getActivePlayers(game).filter(player => !bidding.passedPlayerIds.includes(player.id));
-    const index = bidders.findIndex(player => player.id === playerId);
-    if (
-        index === -1 ||
-        game.currentPlayerId !== playerId ||
-        playerId === bidding.highestBidderId ||
-        bidders.length < 2
-    )
+    if (bidding === null || !canRaiseBid(game, playerId, amount))
         throw new Error("Cannot raise this bid.");
 
-    if (!Number.isSafeInteger(amount) || amount !== bidding.currentBid + BID_STEP)
-        throw new Error("Invalid bid increment.");
-
-    const canBluff = game.rules.enablePenalties && game.rules.allowBidBluff;
-    if (!canBluff && amount > getMaxBid(bidders[index].hand, game.rules))
-        throw new Error("Bid exceeds the hand's limit.");
-
+    // Update bidding state
     bidding.currentBid = amount;
     bidding.highestBidderId = playerId;
     bidding.hasRaised = true;
-    bidding.challengeOpen = canBluff;
-    game.currentPlayerId = bidders[(index + 1) % bidders.length].id;
+
+    // Open a new challenge window
+    bidding.challengeOpen = game.rules.enablePenalties && game.rules.allowBidBluff;
+    moveBidding(game);
 }
 
 /**
@@ -115,8 +102,6 @@ export function challengeBid(game: GameState, playerId: number): boolean {
         throw new Error("Bidder not found.");
 
     const maxBid = getMaxBid(bidder.hand, game.rules);
-
-    // Close the challenge window
     bidding.challengeOpen = false;
 
     // (!) The bid is justified
@@ -130,4 +115,122 @@ export function challengeBid(game: GameState, playerId: number): boolean {
     restartUnplayedRound(game, true);
 
     return true;
+}
+
+function canActInBidding(game: GameState, playerId: number): boolean {
+    const bidding = game.bidding;
+
+    if (game.phase !== GAME_PHASES.BIDDING || bidding === null)
+        return false;
+
+    if (game.currentPlayerId !== playerId)
+        return false;
+
+    if (bidding.highestBidderId === playerId)
+        return false;
+
+    if (bidding.passedPlayerIds.includes(playerId))
+        return false;
+
+    return getActivePlayers(game).some(player => player.id === playerId);
+}
+
+/**
+ * Проверяет возможность повышения ставки.
+ * Checks whether a player can raise the bid.
+ *
+ * @param game - Current game state.
+ * @param playerId - Bidding player.
+ * @param amount - Bid amount.
+ * @returns Whether the bid is allowed. (true / false)
+ */
+export function canRaiseBid(game: GameState, playerId: number, amount: number): boolean {
+    const bidding = game.bidding;
+
+    if (bidding === null || !canActInBidding(game, playerId))
+        return false;
+
+    // (!) Validate
+    if (!Number.isSafeInteger(amount) || amount !== bidding.currentBid + BID_STEP)
+        return false;
+
+    const player = game.players.find(player => player.id === playerId);
+    if (player === undefined)
+        return false;
+
+    // (!) Bluffing is allowed only if penalties are enabled
+    const canBluff = game.rules.enablePenalties && game.rules.allowBidBluff;
+
+    return canBluff || amount <= getMaxBid(player.hand, game.rules);
+}
+
+export function canPassBid(game: GameState, playerId: number): boolean {
+    return canActInBidding(game, playerId);
+}
+
+
+export function passBid(game: GameState, playerId: number): void {
+    const bidding = game.bidding;
+
+    if (bidding === null || !canPassBid(game, playerId))
+        throw new Error("Cannot pass.");
+
+    bidding.passedPlayerIds = [...bidding.passedPlayerIds, playerId];
+    bidding.challengeOpen = false;
+    moveBidding(game);
+}
+
+/**
+ * Переводит ход на следующего участника торгов.
+ * Moves bidding to the next player in bidding phase.
+ */
+function moveBidding(game: GameState): void {
+    const bidding = game.bidding;
+
+    if (bidding === null)
+        throw new Error("Bidding is not initialized.");
+
+    const activePlayers = getActivePlayers(game);
+    const currentIndex = activePlayers.findIndex(player => player.id === game.currentPlayerId);
+
+    if (currentIndex === -1)
+        throw new Error("Current bidder not found.");
+
+    for (let offset = 1; offset < activePlayers.length; offset++)
+    {
+        const nextIndex = (currentIndex + offset) % activePlayers.length;
+        const nextPlayer = activePlayers[nextIndex];
+
+        // Skip players who have passed
+        if (bidding.passedPlayerIds.includes(nextPlayer.id))
+            continue;
+
+        // Skip the current highest bidder
+        if (nextPlayer.id === bidding.highestBidderId)
+            continue;
+
+        game.currentPlayerId = nextPlayer.id;
+        return;
+    }
+
+    finishBidding(game);
+}
+
+export function finishBidding(game: GameState): void {
+    const bidding = game.bidding;
+
+    if (game.phase !== GAME_PHASES.BIDDING || bidding === null)
+        throw new Error("Bidding is not active.");
+
+    const remainingPlayers = getActivePlayers(game).filter(player => !bidding.passedPlayerIds.includes(player.id));
+
+    // (!) Keep only the highest bidder
+    if (remainingPlayers.length !== 1 || remainingPlayers[0].id !== bidding.highestBidderId)
+        throw new Error("Bidding is not finished.");
+
+    bidding.challengeOpen = false;
+
+    // Assign the turn to the winning bidder and move to the next game phase
+    game.currentPlayerId = bidding.highestBidderId;
+    game.phase = GAME_PHASES.EXCHANGING;
 }

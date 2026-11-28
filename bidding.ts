@@ -1,5 +1,5 @@
 import { getCardsPoints, getHandMarriagePoints } from "./cards.ts";
-import { GAME_PHASES, MIN_BID, BID_STEP } from "./constants.ts";
+import { GAME_PHASES, MIN_BID, BID_STEP, MAX_BLUFF_BID } from "./constants.ts";
 import { createDeck, validateDeal } from "./deck.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
@@ -151,18 +151,25 @@ export function canRaiseBid(game: GameState, playerId: number, amount: number): 
     if (bidding === null || !canActInBidding(game, playerId))
         return false;
 
-    // (!) Validate
+    // (!) Validate the bid increment
     if (!Number.isSafeInteger(amount) || amount !== bidding.currentBid + BID_STEP)
         return false;
 
     const player = game.players.find(player => player.id === playerId);
+
     if (player === undefined)
         return false;
 
-    // (!) Bluffing is allowed only if penalties are enabled
+    const maxBid = getMaxBid(player.hand, game.rules);
+
+    // (!) A justified bid is always allowed
+    if (amount <= maxBid)
+        return true;
+
+    // (!) Bluffing is limited to MAX_BLUFF_BID
     const canBluff = game.rules.enablePenalties && game.rules.allowBidBluff;
 
-    return canBluff || amount <= getMaxBid(player.hand, game.rules);
+    return canBluff && amount <= MAX_BLUFF_BID;
 }
 
 export function canPassBid(game: GameState, playerId: number): boolean {

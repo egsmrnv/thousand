@@ -123,3 +123,25 @@ export type ContractState = {
     readonly amount: number;
     readonly resigned: boolean;
 };
+
+/**
+ * Результат завершённой взятки.
+ * Completed trick result.
+ */
+export type TrickResult = {
+    readonly cards: readonly PlayedCard[];
+    readonly winnerId: number;
+    readonly points: number;
+    readonly remainingTalon: readonly Card[];
+};
+
+/**
+ * Результат команды хода. outcome: 0 - сыгран, 1 - оштрафован
+ * Card play result. outcome: 0 - played, 1 - penalized
+ */
+export type PlayCardResult = {
+    readonly outcome: 0;
+    readonly completedTrick: TrickResult | null;
+} | {
+    readonly outcome: 1;
+};

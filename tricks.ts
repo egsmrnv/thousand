@@ -1,8 +1,8 @@
-import { RANKS } from "./constants.ts";
+import { RANKS, GAME_PHASES, MARRIAGE_ACE_POINTS } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
-import { getCardId, getCardsPoints, findMarriages, findAceMarriage } from "./cards.ts";
-import type { Card, Suit, PlayedCard } from "./types.ts";
+import { getCardId, getCardsPoints, findMarriages, findAceMarriage, getMarriagePoints } from "./cards.ts";
+import type { Card, Suit, PlayedCard, GameState, PlayerState, TrickResult, PlayCardResult } from "./types.ts";
 
 /**
  * @param challenger Card challenging the current winner (if it wins return true). / Карта которая будет сравниваться с текущей (если она будет сильнее то true)

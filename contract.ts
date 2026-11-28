@@ -120,10 +120,7 @@ export function canResignContract(game: GameState, playerId: number): boolean {
  * Роспись контракта (заказа), завершение розыгрыша и переход далее.
  * Resigns the contract and moves to scoring phase.
  */
-export function resignContract(
-    game: GameState,
-    playerId: number
-): void {
+export function resignContract(game: GameState, playerId: number): void {
     const contract = game.contract;
 
     if (contract === null || !canResignContract(game, playerId))

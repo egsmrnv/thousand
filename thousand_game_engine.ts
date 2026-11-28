@@ -38,6 +38,7 @@ export function createGame(
     return {
         rules: Object.freeze({ ...rules }),
         players: players,
+        hiddenHand: [],
         bidding: null,
         phase: GAME_PHASES.WAITING,
         roundNumber: 0,
@@ -90,6 +91,8 @@ export function startRound(game: GameState): void {
         player.roundPoints = 0;
         player.tricksWon = 0;
     }
+
+    game.hiddenHand = [];
 
     // Reset bidding and cutting states
     game.bidding = null;
@@ -272,8 +275,7 @@ export function dealRound(game: GameState): void {
 
     const playerCount = game.players.length;
 
-    // (!) Two-player mode is not implemented yet
-    if (playerCount !== 3 && playerCount !== 4)
+    if (playerCount !== 2 && playerCount !== 3 && playerCount !== 4)
         throw new Error("Unsupported player count.");
 
     const dealer = game.players.find(player => player.id === game.dealerId); // Find the dealer
@@ -286,15 +288,17 @@ export function dealRound(game: GameState): void {
     if (!validateDeal(hands, talon, 3))
         throw new Error("Invalid card distribution.");
 
-    // (!) 4-player game:
-    // > The dealer does not play (use hand) in the round.
-    const activePlayers = getActivePlayers(game);
-
     // Assign hands
+    const activePlayers = getActivePlayers(game);
     for (let i = 0; i < activePlayers.length; i++)
         activePlayers[i].hand = hands[i];
 
-    // Inactive dealer's hand
+    // (!) 2-player game:
+    // > The third hand remains face down.
+    game.hiddenHand = playerCount === 2 ? hands[2] : [];
+
+    // (!) 4-player game:
+    // > The dealer does not participate in the round.
     if (playerCount === 4)
         dealer.hand = [];
 
@@ -369,6 +373,8 @@ export function restartUnplayedRound(
         player.roundPoints = 0;
         player.tricksWon = 0;
     }
+
+    game.hiddenHand = [];
 
     // Prepare a new deck, reset trump
     game.deck = shuffleDeck(createDeck());

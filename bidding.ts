@@ -3,7 +3,7 @@ import { GAME_PHASES, MIN_BID, BID_STEP, MAX_BLUFF_BID } from "./constants.ts";
 import { createDeck, validateDeal } from "./deck.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
-import { applyPenalty, getActivePlayers, restartUnplayedRound } from "./thousand_game_engine.ts";
+import { applyPenalty, getActivePlayers, restartUnplayedRound } from "./state.ts";
 import type { Card, GameState } from "./types.ts";
 
 const deckCardPoints = getCardsPoints(createDeck());

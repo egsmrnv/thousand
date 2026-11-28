@@ -1,9 +1,10 @@
-import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_COUNT, MIN_HAND_POINTS_TWO_PLAYERS } from "./constants.ts";
+import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, MIN_HAND_POINTS, DRUMS_COUNT, MIN_HAND_POINTS_TWO_PLAYERS } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
 import { createDeck, shuffleDeck, validateDeck, dealCards, validateDeal } from "./deck.ts";
 import type { GameState, PlayerState, CutResult } from "./types.ts";
 import { getCardsPoints } from "./cards.ts";
+import { getActivePlayers, applyPenalty, restartUnplayedRound } from "./state.ts";
 
 // ##############
 // Logic for game phases, rounds, and states.
@@ -122,33 +123,6 @@ export function startRound(game: GameState): void {
 }
 
 /**
- * Применяет стандартный штраф к игроку.
- * Applies a standard penalty to a player.
- */
-export function applyPenalty(
-    game: GameState,
-    player: PlayerState
-): void {
-    if (!game.rules.enablePenalties)
-        return;
-
-    if (player.totalPoints === BARREL_SCORE) {
-        player.totalPoints -= BARREL_PENALTY_POINTS;
-        player.barrelAttemptsUsed = 0;
-    }
-    else {
-        player.totalPoints -= PENALTY_POINTS;
-    }
-
-    // Score reset (+/- 555)
-    if (
-        game.rules.enableScoreReset &&
-        Math.abs(player.totalPoints) === SCORE_RESET_VALUE
-    )
-        player.totalPoints = 0;
-}
-
-/**
  * Cнятие колоды (перед раздачей).
  * Performs a deck cut.
  *
@@ -257,13 +231,6 @@ export function cutDeck(game: GameState, cutCount: number): CutResult {
     };
 }
 
-export function getActivePlayers(game: GameState): readonly PlayerState[] {
-    if (game.players.length === 4)
-        return game.players.filter(player => player.id !== game.dealerId);
-
-    return game.players;
-}
-
 /**
  * Распределяет карты между игроками.
  * Distributes cards between players.
@@ -349,68 +316,6 @@ function findEligibleRedealPlayer(game: GameState, playerId: number): PlayerStat
         return player;
 
     return undefined;
-}
-
-/**
- * Перезапускает несостоявшуюся раздачу.
- * Restarts an unplayed round.
- *
- * @param game - Current game state.
- * @param rotateDealer - Whether to rotate the dealer.
- */
-export function restartUnplayedRound(
-    game: GameState,
-    rotateDealer: boolean = false
-): void {
-    let dealerIndex = game.players.findIndex(
-        player => player.id === game.dealerId
-    );
-
-    if (dealerIndex === -1)
-        throw new Error("Dealer not found.");
-
-    if (rotateDealer) {
-        dealerIndex =
-            (dealerIndex + 1) % game.players.length;
-
-        game.dealerId = game.players[dealerIndex].id;
-    }
-
-    const cutterIndex =
-        (dealerIndex + 1) % game.players.length;
-
-    // Reset round state of all players
-    for (const player of game.players) {
-        player.hand = [];
-        player.roundPoints = 0;
-        player.tricksWon = 0;
-    }
-
-    // Prepare a new deck, reset trump
-    game.deck = shuffleDeck(createDeck());
-    game.talon = [];
-    game.secondTalon = [];
-    game.currentTrick = [];
-    game.bidding = null;
-    game.exchange = null;
-    game.contract = null;
-
-    game.trump = {
-        suit: null,
-        playerId: null
-    };
-
-    // Reset counters
-    game.cutting = {
-        jackCount: 0,
-        nineCount: 0
-    };
-
-    // Return to CUTTING game phase
-    game.currentPlayerId =
-        game.players[cutterIndex].id;
-
-    game.phase = GAME_PHASES.CUTTING;
 }
 
 export function requestRedeal(game: GameState, playerId: number): void {

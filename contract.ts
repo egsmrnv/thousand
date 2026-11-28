@@ -1,7 +1,7 @@
 
 import { GAME_PHASES, BID_STEP, BARREL_SCORE, WIN_SCORE } from "./constants.ts";
 import { getMaxBid } from "./bidding.ts";
-import { getActivePlayers } from "./thousand_game_engine.ts";
+import { getActivePlayers } from "./state.ts";
 import type { GameState, PlayerState } from "./types.ts";
 
 /**

@@ -2,7 +2,7 @@
 import { GAME_PHASES, MIN_TALON_POINTS } from "./constants.ts";
 import { getCardId, getCardsPoints, getCardsPointsWithMarriages } from "./cards.ts";
 import { validateDeal } from "./deck.ts";
-import { getActivePlayers, restartUnplayedRound } from "./thousand_game_engine.ts";
+import { getActivePlayers, restartUnplayedRound } from "./state.ts";
 import type { Card, CardTransfer, GameState, PlayerState } from "./types.ts";
 
 /**

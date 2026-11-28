@@ -110,6 +110,13 @@ export type GameRules = {
      * Always reveal the selected talon to all players (true / false)
      */
     alwaysRevealTalon: boolean;
+
+    /**
+     * ONLY if enablePenalties = true
+     * Включить штрафы за недопустимые ходы?
+     * Enable penalties for illegal moves?
+     */
+    enableDangerZone: boolean;
 };
 
 /**
@@ -128,7 +135,8 @@ export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     enableScoreReset: true,
     enableBolts: true,
     enableDrums: false,
-    alwaysRevealTalon: false
+    alwaysRevealTalon: false,
+    enableDangerZone: false
 });
 
 /**

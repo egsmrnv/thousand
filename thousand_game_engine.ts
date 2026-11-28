@@ -1,4 +1,4 @@
-import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_COUNT } from "./constants.ts";
+import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_COUNT, MIN_HAND_POINTS_TWO_PLAYERS } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
 import { createDeck, shuffleDeck, validateDeck, dealCards, validateDeal } from "./deck.ts";
@@ -17,10 +17,7 @@ import { getCardsPoints } from "./cards.ts";
  * @param rules - Game rules. / Правила игры.
  * @returns Initial game state. / Начальное состояние игры.
  */
-export function createGame(
-    playerCount: 2 | 3 | 4,
-    rules: Readonly<GameRules> = DEFAULT_GAME_RULES
-): GameState {
+export function createGame(playerCount: 2 | 3 | 4, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): GameState {
     const players: PlayerState[] = [];
 
     for (let i = 0; i < playerCount; i++) {
@@ -51,7 +48,7 @@ export function createGame(
         deck: [],
         talon: [],
         secondTalon: [],
-        dealerId: players[0].id,
+        dealerId: players[Math.floor(Math.random() * players.length)].id,
         currentPlayerId: null,
         trump: {
             suit: null,
@@ -345,8 +342,10 @@ function findEligibleRedealPlayer(game: GameState, playerId: number): PlayerStat
     if (nineCount === 4 || jackCount === 4)
         return player;
 
+    const minHandPoints = game.players.length === 2 ? MIN_HAND_POINTS_TWO_PLAYERS : MIN_HAND_POINTS;
+
     // (!) Not enough card points
-    if (getCardsPoints(player.hand) < MIN_HAND_POINTS)
+    if (getCardsPoints(player.hand) < minHandPoints)
         return player;
 
     return undefined;

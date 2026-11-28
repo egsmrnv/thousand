@@ -138,8 +138,22 @@ export const DRUMS_COUNT = 3;
 export const MIN_HAND_POINTS = 14;
 
 /**
+ * Минимальное количество очков в руке, чтобы не было пересдачи по очкам. (Два игрока)
+ * 
+ * Minimum card points in a hand required to prevent a point-based redeal. (Two player mode)
+ */
+export const MIN_HAND_POINTS_TWO_PLAYERS = 28;
+
+/**
  * Минимальное количество очков в прикупе, чтобы не было пересдачи по очкам.
  *
  * Minimum card points in the talon required to prevent a point-basedredeal.
  */
 export const MIN_TALON_POINTS = 5;
+
+/**
+ * Максимальная ставка при блефе.
+ * 
+ * Max bid when bluffing.
+ */
+export const MAX_BLUFF_BID = 320;

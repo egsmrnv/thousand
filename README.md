@@ -12,6 +12,8 @@ At tables of three or four, three players take part in each deal. At a four-play
 
 At a two-player table, each player receives ten cards and there are two face-down talons of two cards each. The auction winner chooses one blindly and gives one card to the opponent. Eleven two-card tricks follow. The winner of the last trick also earns the card points of the remaining talon, without marriage bonuses. The same bidding limits and barrel rules apply. [Two-player rules](./RULES.md#21-игра-вдвоём-с-двумя-прикупами).
 
+The final contract cannot be lower than the winning bid, even if a marriage is lost during the exchange. The player remains responsible for fulfilling the contract; losing a marriage is not a penalty.
+
 At 880 a player enters the *barrel*. They can still bid below 120, but their final contract must be at least 120 and at least their winning bid. They have three attempts to win the auction and fulfil the contract in the same deal. [Rules v1.1 and a worked deal (in Russian)](./RULES.md#пример-одной-раздачи)
 
 ### What works today
@@ -21,16 +23,17 @@ At 880 a player enters the *barrel*. They can still bid below 120, but their fin
 - At tables of two, three or four, `dealRound()` assigns hands and the talon (two talons for two players). A player may request a redeal on hand-based grounds. `startBidding()` opens at 100, `raiseBid()` advances the auction, `passBid()` passes and finishes the auction when one bidder remains, and `challengeBid()` checks the latest raise when bluffing and penalties are enabled. A confirmed bluff penalizes the bidder and restarts the deal with the next dealer.
 - The winner uses `takeTalon()` to take the talon or choose one of two in a two-player game. `getVisibleTalon()` applies the auction’s visibility rule or the `alwaysRevealTalon` setting. At a four-player table, the engine saves the original talon value for the dealer’s later scoring.
 - With redeals enabled, the winner can use `requestTalonRedeal()` after taking a talon worth fewer than five card points. If play continues, the winner uses `exchangeCards()` to give one card to each active opponent and advance to `CONTRACT`.
+- `getMinContract()` and `getMaxContract()` determine the final contract range after the exchange, including the barrel minimum and the winning bid. `canDeclareContract()` validates the amount in steps of five; `declareContract()` stores it separately from the auction bid and advances to `PLAYING`, with the winner leading the first trick.
 - With `createGameRules({ enableDrums: true })`, each player starts with three drums. A successful redeal request based on either the hand or the talon spends one drum. The option is off by default. [Redeal rules (in Russian)](./RULES.md#41-барабаны)
 - Individual functions can deal and validate hands, detect marriages, find legal moves and determine a trick’s winner and points.
 
 ### Roadmap
 
-Next come setting the final contract and playing tricks. Scoring will include the dealer’s original talon value at a four-player table and the remaining talon’s card points for the winner of the last trick in a two-player game. Later milestones include automated tests, a React client with animated SVG cards, computer opponents and online play.
+Next come contract resignation, playing tricks and declaring marriages during play. Scoring will include the dealer’s original talon value at a four-player table and the remaining talon’s card points for the winner of the last trick in a two-player game. Later milestones include automated tests, a React client with animated SVG cards, computer opponents and online play.
 
 ### Where to work
 
-Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `createGame()`, `startRound()` and `cutDeck()` to see how the game changes state. The main module also selects the active players. Import card, deck, bidding, exchange and trick operations directly from the modules below.
+Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `createGame()`, `startRound()` and `cutDeck()` to see how the game changes state. The main module also selects the active players. Import card, deck, bidding, exchange, contract and trick operations directly from the modules below.
 
 | Module | What belongs here |
 | --- | --- |
@@ -41,6 +44,7 @@ Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `crea
 | [deck.ts](./deck.ts) | Create, validate, shuffle and deal a deck. `dealCards()` returns hands and one or two talons. |
 | [bidding.ts](./bidding.ts) | Bid limits, opening and finishing the auction, raising, passing and challenging bids. |
 | [exchange.ts](./exchange.ts) | Taking and showing the selected talon, weak-talon redeals and exchanging cards. |
+| [contract.ts](./contract.ts) | Final contract limits, validation and declaration. |
 | [tricks.ts](./tricks.ts) | Which card can be played, whether a marriage can be declared on that play, and who wins the trick. |
 
 [Rules and reference scenarios](./RULES.md#18-контрольные-сценарии) give the expected results for individual plays and deals.
@@ -66,6 +70,8 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 
 Вдвоём каждому раздают по десять карт, а ещё четыре карты образуют два закрытых прикупа по две карты. Победитель торгов выбирает один вслепую и отдаёт одну карту сопернику. Играют одиннадцать взяток по две карты. Победитель последней взятки дополнительно получает карточные очки оставшегося прикупа без бонусов за марьяжи. Лимиты ставок и правила бочки прежние. [Правила игры вдвоём](./RULES.md#21-игра-вдвоём-с-двумя-прикупами).
 
+Окончательный заказ не может быть меньше выигранной ставки, даже если при обмене игрок потерял марьяж. Игрок сам отвечает за выполнение заказа; штраф за потерю марьяжа не начисляется.
+
 При достижении 880 игрок попадает на бочку. Он может торговаться ниже 120, но окончательный заказ должен быть не ниже 120 и не ниже выигранной ставки. Есть три попытки, чтобы выиграть торги и выполнить заказ в той же раздаче. [Правила v1.1 и пример раздачи](./RULES.md#пример-одной-раздачи)
 
 ### Что уже работает
@@ -75,16 +81,17 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 - Вдвоём, втроём и вчетвером `dealRound()` раздаёт руки и прикуп (вдвоём — два прикупа). Игрок может запросить пересдачу по своей руке. `startBidding()` открывает торги со 100, `raiseBid()` повышает ставку, `passBid()` обрабатывает пас и завершает торги, когда остаётся один участник. При включённых блефе и штрафах соперник может оспорить последнее повышение через `challengeBid()`. Подтверждённый блеф ведёт к штрафу и новой сдаче со следующим сдающим.
 - Победитель торгов получает прикуп через `takeTalon()`, а вдвоём выбирает один из двух. `getVisibleTalon()` учитывает ход торгов и настройку `alwaysRevealTalon`. Вчетвером движок сохраняет исходную стоимость прикупа для последующего начисления сдающему.
 - При включённых пересдачах победитель может вызвать `requestTalonRedeal()` после получения прикупа стоимостью меньше пяти карточных очков. Если раздача продолжается, победитель передаёт по одной карте каждому активному сопернику через `exchangeCards()`. Движок переходит в `CONTRACT`.
+- `getMinContract()` и `getMaxContract()` определяют границы окончательного заказа после обмена с учётом бочки и выигранной ставки. `canDeclareContract()` проверяет заказ, кратный пяти; `declareContract()` сохраняет его отдельно от ставки торгов и переводит игру в `PLAYING`, оставляя первый ход заказчику.
 - При `createGameRules({ enableDrums: true })` у каждого игрока по три барабана на партию. Успешная пересдача по руке или прикупу расходует один барабан. По умолчанию опция выключена. [Правила пересдачи](./RULES.md#41-барабаны)
 - Отдельные функции раскладывают карты по рукам, проверяют раздачу, находят марьяжи и допустимые ходы, определяют победителя и стоимость взятки.
 
 ### План разработки
 
-Ближайшие шаги — окончательный заказ и розыгрыш. При подсчёте очков предстоит учесть стоимость исходного прикупа у сдающего вчетвером и карточные очки оставшегося прикупа у победителя последней взятки вдвоём. Дальше в планах автотесты, интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети.
+Ближайшие шаги — роспись, розыгрыш взяток и объявление марьяжей во время розыгрыша. При подсчёте очков предстоит учесть стоимость исходного прикупа у сдающего вчетвером и карточные очки оставшегося прикупа у победителя последней взятки вдвоём. Дальше в планах автотесты, интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети.
 
 ### Файлы проекта
 
-Начните с [thousand_game_engine.ts](./thousand_game_engine.ts). По функциям `createGame()`, `startRound()` и `cutDeck()` можно проследить, как меняется состояние партии. Главный модуль также определяет активных игроков. Функции для работы с картами, колодой, торгами, обменом и взятками импортируйте напрямую из модулей ниже.
+Начните с [thousand_game_engine.ts](./thousand_game_engine.ts). По функциям `createGame()`, `startRound()` и `cutDeck()` можно проследить, как меняется состояние партии. Главный модуль также определяет активных игроков. Функции для работы с картами, колодой, торгами, обменом, контрактом и взятками импортируйте напрямую из модулей ниже.
 
 | Модуль | Что в нём искать |
 | --- | --- |
@@ -95,6 +102,7 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 | [deck.ts](./deck.ts) | Создание, проверка, перемешивание и раздача колоды. `dealCards()` возвращает руки и один или два прикупа. |
 | [bidding.ts](./bidding.ts) | Предел ставки, начало и завершение торгов, повышение, пас и оспаривание ставки. |
 | [exchange.ts](./exchange.ts) | Получение и показ выбранного прикупа, пересдача по слабому прикупу и обмен картами. |
+| [contract.ts](./contract.ts) | Границы окончательного заказа, проверка и объявление контракта. |
 | [tricks.ts](./tricks.ts) | Какой картой можно пойти, можно ли объявить марьяж при этом ходе и кто забирает взятку. |
 
 В [контрольных сценариях](./RULES.md#18-контрольные-сценарии) можно сверить ожидаемый результат хода или раздачи.

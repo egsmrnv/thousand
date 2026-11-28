@@ -46,6 +46,7 @@ export type GameState = {
 
     bidding: BiddingState | null;
     exchange: ExchangeState | null;
+    contract: ContractState | null;
 
     phase: GamePhase;
     roundNumber: number;
@@ -111,4 +112,13 @@ export type ExchangeState = {
 export type CardTransfer = {
     readonly recipientId: number;
     readonly card: Card;
+};
+
+/**
+ * Окончательный заказ игрока.
+ * Final contract of the bidding-phase winner.
+ */
+export type ContractState = {
+    readonly playerId: number;
+    readonly amount: number;
 };

@@ -41,6 +41,7 @@ export function createGame(
         players: players,
         bidding: null,
         exchange: null,
+        contract: null,
         phase: GAME_PHASES.WAITING,
         roundNumber: 0,
         cutting: {
@@ -97,6 +98,7 @@ export function startRound(game: GameState): void {
     // Reset states
     game.bidding = null;
     game.exchange = null;
+    game.contract = null;
 
     game.cutting = {
         jackCount: 0,
@@ -392,6 +394,7 @@ export function restartUnplayedRound(
     game.currentTrick = [];
     game.bidding = null;
     game.exchange = null;
+    game.contract = null;
 
     game.trump = {
         suit: null,

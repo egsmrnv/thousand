@@ -191,3 +191,170 @@ export function getPlayerLegalMoves(game: GameState, playerId: number): readonly
 export function canPlayCard(game: GameState, playerId: number, card: Card): boolean {
     return getPlayerLegalMoves(game, playerId).some(legalCard => legalCard.suit === card?.suit && legalCard.rank === card?.rank);
 }
+
+/**
+ * Может ли игрок объявить марьяж выбранной картой.
+ * If the player can declare a marriage with the selected card.
+*/
+export function canDeclareMarriageOnPlay(game: GameState, playerId: number, card: Card): boolean {
+    const player = getPlayingPlayer(game, playerId);
+
+    if (player === undefined || !canPlayCard(game, playerId, card))
+        return false;
+
+    return canDeclareMarriage(player.hand, card, game.currentTrick.length === 0, player.tricksWon > 0, game.rules);
+}
+
+/**
+ * Выполняет ход игрока + (опционально) объявляет марьяж.
+ * Plays a card with + (optional) marriage declaration.
+ */
+export function playCard(game: GameState, playerId: number, card: Card, declareMarriage: boolean = false): PlayCardResult {
+    const player = getPlayingPlayer(game, playerId);
+
+    if (player === undefined)
+        throw new Error("Cannot play in the current state.");
+
+    if (typeof declareMarriage !== "boolean")
+        throw new Error("Invalid marriage option.");
+
+    // Find the selected card in the player's hand
+    const selectedCard = player.hand.find(handCard => handCard.suit === card?.suit && handCard.rank === card?.rank);
+
+    if (selectedCard === undefined)
+        throw new Error("Card not found in the player's hand.");
+
+    // (!) Check if the card can be played
+    if (!canPlayCard(game, playerId, selectedCard)) {
+
+        // (!) DANGER ZONE
+        if (game.rules.enablePenalties && game.rules.enableDangerZone)
+        {
+            applyPenalty(game, player);
+            restartUnplayedRound(game, true);
+
+            return { outcome: 1 };
+        }
+
+        throw new Error("Illegal card play.");
+    }
+
+    // (!) Marriage declaration
+    if (declareMarriage) {
+        if (!canDeclareMarriageOnPlay(game, playerId, selectedCard))
+            throw new Error("Cannot declare a marriage.");
+
+        if (selectedCard.rank === RANKS.ACE)
+            player.roundPoints += MARRIAGE_ACE_POINTS;
+
+        else
+        {
+            player.roundPoints += getMarriagePoints(selectedCard.suit);
+
+            // > Assign the new trump suit and its owner
+            game.trump = {
+                suit: selectedCard.suit,
+                playerId: playerId
+            };
+        }
+    }
+
+    // Remove the played card from the player's hand
+    player.hand = player.hand.filter(handCard => getCardId(handCard) !== getCardId(selectedCard));
+
+    // Add the card to the current trick
+    game.currentTrick = [
+        ...game.currentTrick,
+        {
+            playerId: playerId,
+            card: selectedCard
+        }
+    ];
+
+    const activePlayers = getActivePlayers(game);
+
+    // (!) Complete the trick if everyone has played
+    if (game.currentTrick.length === activePlayers.length)
+        return {
+            outcome: 0,
+            completedTrick: finishTrick(game)
+        };
+
+    // Pass the turn to the next active player
+    const currentIndex = activePlayers.findIndex(activePlayer => activePlayer.id === playerId);
+
+    const nextIndex = (currentIndex + 1) % activePlayers.length;
+
+    game.currentPlayerId = activePlayers[nextIndex].id;
+
+    return {
+        outcome: 0,
+        completedTrick: null
+    };
+}
+
+/**
+ * Завершает взятку.
+ * - Определяет победителя и начисляет очки.
+ * - Передаёт победителю право следующего хода.
+ * - Если карты закончились, переводит игру в фазу SCORING.
+ *
+ * Completes the trick.
+ * - Determines the winner and assigns points.
+ * - Passes the next turn to the winner.
+ * - Moves to SCORING phase if all cards were played.
+ */
+function finishTrick(game: GameState): TrickResult {
+    const activePlayers = getActivePlayers(game);
+
+    if (game.currentTrick.length !== activePlayers.length)
+        throw new Error("The trick is not completed.");
+
+    const winningPlay = getTrickWinner(game.currentTrick, game.trump.suit);
+
+    if (winningPlay === null)
+        throw new Error("Trick winner not found.");
+
+    const winner = activePlayers.find(player => player.id === winningPlay.playerId);
+
+    if (winner === undefined)
+        throw new Error("Winning player not found.");
+
+    const cards = [...game.currentTrick];
+    let points = getTrickPoints(cards);
+
+    const isLastTrick = activePlayers.every(player => player.hand.length === 0);
+
+    let remainingTalon: readonly Card[] = [];
+
+    // (!) Two-player game:
+    // > The winner of the last trick receives the remaining talon points.
+    if (isLastTrick && game.players.length === 2) {
+        remainingTalon = [...game.talon, ...game.secondTalon];
+
+        points += getCardsPoints(remainingTalon);
+
+        game.talon = [];
+        game.secondTalon = [];
+    }
+
+    winner.roundPoints += points;
+    winner.tricksWon++;
+
+    game.currentTrick = [];
+
+    if (isLastTrick)
+    {
+        game.currentPlayerId = null;
+        game.phase = GAME_PHASES.SCORING;
+    }
+    else
+        game.currentPlayerId = winner.id;
+
+    return {
+        cards: cards,
+        winnerId: winner.id,
+        points: points,
+        remainingTalon: remainingTalon
+    };
+}

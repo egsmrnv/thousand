@@ -1,8 +1,9 @@
-import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE } from "./constants.ts";
+import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, MIN_BID } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
-import { createDeck, shuffleDeck, validateDeck } from "./deck.ts";
+import { createDeck, shuffleDeck, validateDeck, dealCards, validateDeal } from "./deck.ts";
 import type { GameState, PlayerState, CutResult } from "./types.ts";
+import { getCardsPoints } from "./cards.ts";
 
 // ##############
 // Logic for game phases, rounds, and states.
@@ -37,6 +38,7 @@ export function createGame(
     return {
         rules: Object.freeze({ ...rules }),
         players: players,
+        bidding: null,
         phase: GAME_PHASES.WAITING,
         roundNumber: 0,
         cutting: {
@@ -89,7 +91,9 @@ export function startRound(game: GameState): void {
         player.tricksWon = 0;
     }
 
-    // Reset cutting state
+    // Reset bidding and cutting states
+    game.bidding = null;
+
     game.cutting = {
         jackCount: 0,
         nineCount: 0
@@ -237,4 +241,153 @@ export function cutDeck(game: GameState, cutCount: number): CutResult {
         revealedCard,
         outcome: 1
     };
+}
+
+/**
+ * Распределяет карты между игроками.
+ * Distributes cards between players.
+ *
+ * @param game - Current game state.
+ */
+export function dealRound(game: GameState): void {
+    if (game.phase !== GAME_PHASES.DEALING)
+        throw new Error("Cannot deal cards in the current phase.");
+
+    const playerCount = game.players.length;
+
+    // (!) Two-player mode is not implemented yet
+    if (playerCount !== 3 && playerCount !== 4)
+        throw new Error("Unsupported player count.");
+
+    const dealer = game.players.find(player => player.id === game.dealerId); // Find the dealer
+
+    if (dealer === undefined)
+        throw new Error("Dealer not found.");
+
+    const { hands, talon } = dealCards(game.deck, 3)
+
+    if (!validateDeal(hands, talon, 3))
+        throw new Error("Invalid card distribution.");
+
+    // (!) 4-player game:
+    // > The dealer does not play (use hand) in the round.
+    const activePlayers = playerCount === 4 ? game.players.filter(player => player.id !== game.dealerId) : game.players;
+
+    // Assign hands
+    for (let i = 0; i < activePlayers.length; i++)
+        activePlayers[i].hand = hands[i];
+
+    // Inactive dealer's hand
+    if (playerCount === 4)
+        dealer.hand = [];
+
+    game.talon = talon;
+    game.deck = [];
+}
+
+/**
+ * Проверяет право на пересдачу.
+ * Checks if a player can redeal.
+ *
+ * @param game - Current game state.
+ * @param playerId 
+ * @returns Whether a redeal is allowed. (true / false)
+ */
+export function canRequestRedeal(game: GameState, playerId: number): boolean {
+    if (!game.rules.allowRedeal)
+        return false;
+
+    // (!) Redeal is allowed after dealing
+    if (game.phase !== GAME_PHASES.DEALING)
+        return false;
+
+    const player = game.players.find(player => player.id === playerId);
+
+    // (!) Player must have a full dealt hand
+    if (player === undefined || player.hand.length !== 7)
+        return false;
+
+    const nineCount = player.hand.filter(card => card.rank === RANKS.NINE).length;
+    const jackCount = player.hand.filter(card => card.rank === RANKS.JACK).length;
+
+    // 4x9 or 4xJ 
+    if (nineCount === 4 || jackCount === 4)
+        return true;
+
+    // (!) Not enough card points
+    return getCardsPoints(player.hand) < MIN_HAND_POINTS;
+}
+
+export function requestRedeal(game: GameState, playerId: number): void {
+    if (!canRequestRedeal(game, playerId))
+        throw new Error("Redeal is not allowed.");
+
+    const dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
+
+    if (dealerIndex === -1)
+        throw new Error("Dealer not found.");
+
+    const cutterIndex = (dealerIndex + 1) % game.players.length;
+
+    // Reset round state of all players
+    for (const player of game.players) {
+        player.hand = [];
+        player.roundPoints = 0;
+        player.tricksWon = 0;
+    }
+
+    // Prepare a new deck, reset trump
+    game.deck = shuffleDeck(createDeck());
+    game.talon = [];
+    game.currentTrick = [];
+    game.bidding = null;
+
+    game.trump = {
+        suit: null,
+        playerId: null
+    };
+
+    // Reset counters
+    game.cutting = {
+        jackCount: 0,
+        nineCount: 0
+    };
+
+    // Return to CUTTING game phase
+    game.currentPlayerId = game.players[cutterIndex].id;
+    game.phase = GAME_PHASES.CUTTING;
+}
+
+export function startBidding(game: GameState): void {
+    if (game.phase !== GAME_PHASES.DEALING)
+        throw new Error("Cannot start bidding.");
+
+    const playerCount = game.players.length;
+
+    if (playerCount !== 3 && playerCount !== 4)
+        throw new Error("Unsupported player count.");
+
+    const dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
+
+    if (dealerIndex === -1)
+        throw new Error("Dealer not found.");
+
+    const activePlayers = playerCount === 4 ? game.players.filter(player => player.id !== game.dealerId) : game.players;
+
+    // (!) Cards must already be dealt
+    if (game.deck.length !== 0 || !validateDeal(activePlayers.map(player => player.hand), game.talon, 3))
+        throw new Error("Invalid card distribution.");
+    
+    const firstBidderIndex = (dealerIndex + 1) % playerCount;
+    const nextBidderIndex = (firstBidderIndex + 1) % playerCount;
+
+    // (!) The first player starts with the minimum bid
+    game.bidding = {
+        currentBid: MIN_BID,
+        highestBidderId: game.players[firstBidderIndex].id,
+        passedPlayerIds: []
+    };
+
+    game.currentPlayerId = game.players[nextBidderIndex].id; // Pass the turn to the next bidder
+    game.phase = GAME_PHASES.BIDDING;
 }

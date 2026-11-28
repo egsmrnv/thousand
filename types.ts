@@ -43,6 +43,8 @@ export type GameState = {
     players: readonly PlayerState[];
     cutting: CuttingState;
 
+    bidding: BiddingState | null;
+
     phase: GamePhase;
     roundNumber: number;
 
@@ -76,4 +78,14 @@ export type CuttingState = {
 export type CutResult = {
     readonly revealedCard: Card;
     readonly outcome: 0 | 1 | 2; // "success" | "retry" | "dealerChanged";
+};
+
+/**
+ * Состояние торговли.
+ * Bidding state.
+ */
+export type BiddingState = {
+    currentBid: number;
+    highestBidderId: number;
+    passedPlayerIds: readonly number[];
 };

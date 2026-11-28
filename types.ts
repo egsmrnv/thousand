@@ -41,7 +41,6 @@ export type TrumpState = {
 export type GameState = {
     readonly rules: Readonly<GameRules>;
     players: readonly PlayerState[];
-    hiddenHand: readonly Card[]; // for 2-player game
     cutting: CuttingState;
 
     bidding: BiddingState | null;
@@ -51,6 +50,7 @@ export type GameState = {
 
     deck: readonly Card[];
     talon: readonly Card[];
+    secondTalon: readonly Card[]; // for 2-player game
 
     dealerId: number;
     currentPlayerId: number | null;

@@ -38,7 +38,6 @@ export function createGame(
     return {
         rules: Object.freeze({ ...rules }),
         players: players,
-        hiddenHand: [],
         bidding: null,
         phase: GAME_PHASES.WAITING,
         roundNumber: 0,
@@ -48,6 +47,7 @@ export function createGame(
         },
         deck: [],
         talon: [],
+        secondTalon: [],
         dealerId: players[0].id,
         currentPlayerId: null,
         trump: {
@@ -92,8 +92,6 @@ export function startRound(game: GameState): void {
         player.tricksWon = 0;
     }
 
-    game.hiddenHand = [];
-
     // Reset bidding and cutting states
     game.bidding = null;
 
@@ -106,6 +104,7 @@ export function startRound(game: GameState): void {
     game.roundNumber++;
     game.deck = shuffleDeck(createDeck());
     game.talon = [];
+    game.secondTalon = [];
 
     // Reset trump and current trick
     game.trump = {
@@ -283,9 +282,10 @@ export function dealRound(game: GameState): void {
     if (dealer === undefined)
         throw new Error("Dealer not found.");
 
-    const { hands, talon } = dealCards(game.deck, 3)
+    const handCount = playerCount === 2 ? 2 : 3;
+    const { hands, talon, secondTalon } = dealCards(game.deck, handCount);
 
-    if (!validateDeal(hands, talon, 3))
+    if (!validateDeal(hands, talon, handCount, secondTalon))
         throw new Error("Invalid card distribution.");
 
     // Assign hands
@@ -293,16 +293,13 @@ export function dealRound(game: GameState): void {
     for (let i = 0; i < activePlayers.length; i++)
         activePlayers[i].hand = hands[i];
 
-    // (!) 2-player game:
-    // > The third hand remains face down.
-    game.hiddenHand = playerCount === 2 ? hands[2] : [];
-
     // (!) 4-player game:
     // > The dealer does not participate in the round.
     if (playerCount === 4)
         dealer.hand = [];
 
     game.talon = talon;
+    game.secondTalon = secondTalon;
     game.deck = [];
 }
 
@@ -322,10 +319,11 @@ export function canRequestRedeal(game: GameState, playerId: number): boolean {
     if (game.phase !== GAME_PHASES.DEALING)
         return false;
 
-    const player = game.players.find(player => player.id === playerId);
+    const player = getActivePlayers(game).find(player => player.id === playerId);
+    const handSize = game.players.length === 2 ? 10 : 7;
 
     // (!) Player must have a full dealt hand
-    if (player === undefined || player.hand.length !== 7)
+    if (player === undefined || player.hand.length !== handSize)
         return false;
 
     const nineCount = player.hand.filter(card => card.rank === RANKS.NINE).length;
@@ -374,11 +372,10 @@ export function restartUnplayedRound(
         player.tricksWon = 0;
     }
 
-    game.hiddenHand = [];
-
     // Prepare a new deck, reset trump
     game.deck = shuffleDeck(createDeck());
     game.talon = [];
+    game.secondTalon = [];
     game.currentTrick = [];
     game.bidding = null;
 

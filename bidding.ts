@@ -18,7 +18,7 @@ export function startBidding(game: GameState): void {
 
     const playerCount = game.players.length;
 
-    if (playerCount !== 3 && playerCount !== 4)
+    if (playerCount !== 2 && playerCount !== 3 && playerCount !== 4)
         throw new Error("Unsupported player count.");
 
     const dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
@@ -27,9 +27,10 @@ export function startBidding(game: GameState): void {
         throw new Error("Dealer not found.");
 
     const activePlayers = getActivePlayers(game);
+    const handCount = playerCount === 2 ? 2 : 3;
 
     // (!) Cards must already be dealt
-    if (game.deck.length !== 0 || !validateDeal(activePlayers.map(player => player.hand), game.talon, 3))
+    if (game.deck.length !== 0 || !validateDeal(activePlayers.map(player => player.hand), game.talon, handCount, game.secondTalon))
         throw new Error("Invalid card distribution.");
 
     const firstBidderIndex = (dealerIndex + 1) % playerCount;

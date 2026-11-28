@@ -58,51 +58,70 @@ export function shuffleDeck(deck: readonly Card[]): Card[] {
 }
 
 /**
- * Deals cards into 3 or 4 hands.
- * The remaining cards go to the talon.
+ * Deals cards into 2, 3 or 4 hands.
+ * Two hands: 10 cards each and two talons of 2 cards.
+ * Three or four hands: one talon, with size equal to handCount.
  * Does not mutate the original deck.
  */
-export function dealCards(deck: readonly Card[], handCount: 3 | 4): {
+export function dealCards(deck: readonly Card[], handCount: 2 | 3 | 4): {
     hands: Card[][];
     talon: Card[];
+    secondTalon: Card[];
 } {
     const hands: Card[][] = [];
     const talon: Card[] = [];
+    const secondTalon: Card[] = [];
+    const talonSize = handCount === 2 ? 2 : handCount;
+    const secondTalonSize = handCount === 2 ? 2 : 0;
+    const handCardsEnd = deck.length - talonSize - secondTalonSize;
 
     // prepare new arrays for each hand
     for(let i = 0; i < handCount; i++)
         hands[i] = [];
 
     for(let i = 0; i < deck.length; i++) {
-        if(i < deck.length - handCount)
+        if(i < handCardsEnd)
             hands[i % handCount].push(deck[i]);
-        else
+        else if(i < handCardsEnd + talonSize)
             talon.push(deck[i]);
+        else
+            secondTalon.push(deck[i]);
     }
     return {
         hands: hands,
-        talon: talon
+        talon: talon,
+        secondTalon: secondTalon
     }
 }
 
 /**
- * Validates card distribution between hands and talon.
+ * Validates card distribution between hands and talons.
  *
  * @param hands - Array of dealt hands.
- * @param talon - Remaining cards in the talon.
- * @param handCount - Number of hands (3 or 4).
+ * @param talon - Cards in the first (or only) talon.
+ * @param handCount - Number of hands (2, 3 or 4).
+ * @param secondTalon - Second talon, empty except in the two-player deal.
  * @returns True if the deal is valid.
  */
-export function validateDeal(hands: readonly (readonly Card[])[], talon: readonly Card[], handCount: 3 | 4): boolean {
-    if(hands.length !== handCount || talon.length !== handCount)
+export function validateDeal(
+    hands: readonly (readonly Card[])[],
+    talon: readonly Card[],
+    handCount: 2 | 3 | 4,
+    secondTalon: readonly Card[] = []
+): boolean {
+    const talonSize = handCount === 2 ? 2 : handCount;
+    const secondTalonSize = handCount === 2 ? 2 : 0;
+
+    if(hands.length !== handCount || talon.length !== talonSize || secondTalon.length !== secondTalonSize)
         return false;
-    
-    const expectedCardCount = Math.floor((Object.keys(SUITS).length * Object.keys(RANKS).length - handCount) / handCount);
-    
+
+    const deckCardCount = Object.keys(SUITS).length * Object.keys(RANKS).length;
+    const expectedCardCount = (deckCardCount - talonSize - secondTalonSize) / handCount;
+
     for(let i = 0; i < hands.length; i++)
         if(hands[i].length !== expectedCardCount)
             return false;
 
-    // combine all cards via [...hands.flat() - from hands, ...talon - from talon]
-    return validateDeck([...hands.flat(), ...talon]);
+    // Combine both talons and all hands; each card must occur exactly once.
+    return validateDeck([...hands.flat(), ...talon, ...secondTalon]);
 }

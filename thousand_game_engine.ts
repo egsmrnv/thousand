@@ -1,4 +1,4 @@
-import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS } from "./constants.ts";
+import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_PER_PLAYER } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
 import { createDeck, shuffleDeck, validateDeck, dealCards, validateDeal } from "./deck.ts";
@@ -31,6 +31,7 @@ export function createGame(
             roundPoints: 0,
             tricksWon: 0,
             bolts: 0,
+            drumsRemaining: rules.enableDrums ? DRUMS_PER_PLAYER : 0,
             barrelAttemptsUsed: 0
         });
     }
@@ -312,29 +313,39 @@ export function dealRound(game: GameState): void {
  * @returns Whether a redeal is allowed. (true / false)
  */
 export function canRequestRedeal(game: GameState, playerId: number): boolean {
+    return findEligibleRedealPlayer(game, playerId) !== undefined;
+}
+
+function findEligibleRedealPlayer(game: GameState, playerId: number): PlayerState | undefined {
     if (!game.rules.allowRedeal)
-        return false;
+        return undefined;
 
     // (!) Redeal is allowed after dealing
     if (game.phase !== GAME_PHASES.DEALING)
-        return false;
+        return undefined;
 
     const player = getActivePlayers(game).find(player => player.id === playerId);
     const handSize = game.players.length === 2 ? 10 : 7;
 
     // (!) Player must have a full dealt hand
     if (player === undefined || player.hand.length !== handSize)
-        return false;
+        return undefined;
+
+    if (game.rules.enableDrums && player.drumsRemaining <= 0)
+        return undefined;
 
     const nineCount = player.hand.filter(card => card.rank === RANKS.NINE).length;
     const jackCount = player.hand.filter(card => card.rank === RANKS.JACK).length;
 
     // 4x9 or 4xJ 
     if (nineCount === 4 || jackCount === 4)
-        return true;
+        return player;
 
     // (!) Not enough card points
-    return getCardsPoints(player.hand) < MIN_HAND_POINTS;
+    if (getCardsPoints(player.hand) < MIN_HAND_POINTS)
+        return player;
+
+    return undefined;
 }
 
 /**
@@ -398,8 +409,12 @@ export function restartUnplayedRound(
 }
 
 export function requestRedeal(game: GameState, playerId: number): void {
-    if (!canRequestRedeal(game, playerId))
+    const player = findEligibleRedealPlayer(game, playerId);
+    if (player === undefined)
         throw new Error("Redeal is not allowed.");
 
     restartUnplayedRound(game);
+
+    if (game.rules.enableDrums)
+        player.drumsRemaining--;
 }

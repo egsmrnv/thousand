@@ -16,14 +16,15 @@ At 880 a player enters the *barrel*. They can still bid below 120, but their fin
 
 ### What works today
 
-- `createGame()` initializes two, three or four players at round zero in `WAITING`. Scores and counters start at zero, hands are empty, and player 0 is the first dealer.
+- `createGame()` initializes two, three or four players at round zero in `WAITING`. Scores start at zero, hands are empty, and player 0 is the first dealer.
 - `startRound()` shuffles the deck and assigns the cutter. After scoring, the next player deals. `cutDeck()` handles retries and penalties, then moves the game to `DEALING` on a successful cut.
 - At tables of two, three or four, `dealRound()` assigns hands and the talon (two talons for two players). A player may request a redeal on hand-based grounds. `startBidding()` opens at 100, `raiseBid()` advances the auction, `passBid()` passes and finishes the auction when one bidder remains, and `challengeBid()` checks the latest raise when bluffing and penalties are enabled. A confirmed bluff penalizes the bidder and restarts the deal with the next dealer.
+- With `createGameRules({ enableDrums: true })`, each player starts with three drums and spends one for each successful redeal request. The option is off by default. [Redeal rules (in Russian)](./RULES.md#41-барабаны)
 - Individual functions can deal and validate hands, detect marriages, find legal moves and determine a trick’s winner and points.
 
 ### Roadmap
 
-Next come choosing or awarding the talon, exchanging cards, setting the contract and playing tricks. The two-player deal and auction are implemented; its talon selection and last-trick bonus are specified but not yet implemented. Later milestones include scoring, automated tests, a React client with animated SVG cards, computer opponents and online play.
+Next come choosing or awarding the talon, checking eligibility for a weak-talon redeal, exchanging cards, setting the contract and playing tricks. The two-player deal and auction are implemented; its talon selection and last-trick bonus are specified but not yet implemented. Later milestones include scoring, automated tests, a React client with animated SVG cards, computer opponents and online play.
 
 ### Where to work
 
@@ -66,14 +67,15 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 
 ### Что уже работает
 
-- `createGame()` создаёт двух, трёх или четырёх игроков в фазе `WAITING`. Номер раздачи, очки и счётчики равны нулю, руки пусты. В коде первым сдаёт игрок 0.
+- `createGame()` создаёт двух, трёх или четырёх игроков в фазе `WAITING`. Номер раздачи и очки равны нулю, руки пусты. В коде первым сдаёт игрок 0.
 - `startRound()` перемешивает колоду и назначает снимающего. После подсчёта очков сдаёт следующий игрок. `cutDeck()` обрабатывает повторные снятия и штрафы, а при успешном снятии переводит партию в `DEALING`.
 - Вдвоём, втроём и вчетвером `dealRound()` раздаёт руки и прикуп (вдвоём — два прикупа). Игрок может запросить пересдачу по своей руке. `startBidding()` открывает торги со 100, `raiseBid()` повышает ставку, `passBid()` обрабатывает пас и завершает торги, когда остаётся один участник. При включённых блефе и штрафах соперник может оспорить последнее повышение через `challengeBid()`. Подтверждённый блеф ведёт к штрафу и новой сдаче со следующим сдающим.
+- При `createGameRules({ enableDrums: true })` у каждого игрока по три барабана на партию. За каждую успешную пересдачу расходуется один барабан. По умолчанию опция выключена. [Правила пересдачи](./RULES.md#41-барабаны)
 - Отдельные функции раскладывают карты по рукам, проверяют раздачу, находят марьяжи и допустимые ходы, определяют победителя и стоимость взятки.
 
 ### План разработки
 
-Ближайшие шаги — выбор или выдача прикупа победителю торгов, обмен картами, окончательный заказ и розыгрыш. Раздача и торги вдвоём реализованы; выбор прикупа и начисление остатка за последнюю взятку описаны в правилах, но пока не реализованы. Дальше в планах подсчёт очков, автотесты, интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети.
+Ближайшие шаги — выбор или выдача прикупа победителю торгов, проверка права на пересдачу по слабому прикупу, обмен картами, окончательный заказ и розыгрыш. Раздача и торги вдвоём реализованы; выбор прикупа и начисление остатка за последнюю взятку описаны в правилах, но пока не реализованы. Дальше в планах подсчёт очков, автотесты, интерфейс на React с анимированными SVG-картами, компьютерные соперники и игра по сети.
 
 ### Файлы проекта
 

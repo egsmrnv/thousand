@@ -27,6 +27,7 @@ export type PlayerState = {
     roundPoints: number,
     tricksWon: number,
     bolts: number,
+    drumsRemaining: number,
     barrelAttemptsUsed:	number
 };
 

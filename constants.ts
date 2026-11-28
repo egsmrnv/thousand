@@ -125,6 +125,12 @@ export const CUT_PENALTY_LIMIT = 3;
 export const BOLT_PENALTY_LIMIT = 3;
 
 /**
+ * Количество барабанов у игрока на партию.
+ * Number of redeal drums per player per game.
+ */
+export const DRUMS_PER_PLAYER = 3;
+
+/**
  * Минимальное количество очков в руке, чтобы не было пересдачи по очкам.
  *
  * Minimum card points in a hand required to prevent a point-based redeal.

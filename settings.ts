@@ -15,6 +15,12 @@ export type GameRules = {
     allowRedeal: boolean;
 
     /**
+     * Включить «Барабаны»? Каждая разрешённая пересдача расходует один барабан.
+     * Enable drums? Each allowed redeal spends one drum.
+     */
+    enableDrums?: boolean;
+
+    /**
      * Можно объявлять марьяж, имея в руке туза каждой масти.
      *
      * Can declare a marriage by having an Ace of each suit in the hand.
@@ -106,6 +112,7 @@ export type GameRules = {
  */
 export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     allowRedeal: true,
+    enableDrums: false,
     allowAceMarriage: true,
     mustTrump: true,
     allowForeignTrumpLead: false,

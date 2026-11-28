@@ -121,4 +121,5 @@ export type CardTransfer = {
 export type ContractState = {
     readonly playerId: number;
     readonly amount: number;
+    readonly resigned: boolean;
 };

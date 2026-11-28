@@ -77,11 +77,64 @@ export function declareContract(game: GameState, playerId: number, amount: numbe
 
     game.contract = {
         playerId: playerId,
-        amount: amount
+        amount: amount,
+        resigned: false
     };
 
     // (!) Keep the original winning bid unchanged.
     // > The winning bidder leads the first trick.
     game.currentPlayerId = playerId;
     game.phase = GAME_PHASES.PLAYING;
+}
+
+export function canResignContract(game: GameState, playerId: number): boolean {
+    const contract = game.contract;
+
+    if (game.phase !== GAME_PHASES.PLAYING || contract === null)
+        return false;
+
+    if (contract.resigned || contract.playerId !== playerId)
+        return false;
+
+    if (game.currentPlayerId !== playerId)
+        return false;
+
+    const activePlayers = getActivePlayers(game);
+    const player = activePlayers.find(player => player.id === playerId);
+
+    if (player === undefined)
+        return false;
+
+    // (!) A player on the barrel cannot resign.
+    if (player.totalPoints === BARREL_SCORE)
+        return false;
+
+    // (!) No cards must be played
+    if (game.currentTrick.length !== 0)
+        return false;
+
+    return activePlayers.every(player => player.tricksWon === 0);
+}
+
+/**
+ * Роспись контракта (заказа), завершение розыгрыша и переход далее.
+ * Resigns the contract and moves to scoring phase.
+ */
+export function resignContract(
+    game: GameState,
+    playerId: number
+): void {
+    const contract = game.contract;
+
+    if (contract === null || !canResignContract(game, playerId))
+        throw new Error("Cannot resign the contract.");
+
+    game.contract = {
+        ...contract,
+        resigned: true
+    };
+
+    // (!) Finish the round without playing tricks.
+    game.currentPlayerId = null;
+    game.phase = GAME_PHASES.SCORING;
 }

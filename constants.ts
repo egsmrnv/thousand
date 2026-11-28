@@ -7,7 +7,7 @@ export const SUITS = {
 
 /**
  * Cards in this game: 9, J, Q, K, 10, A
- */
+*/
 export const RANKS = {
     ACE: 0,
     TEN: 1,
@@ -43,7 +43,7 @@ export const MARRIAGE_POINTS = {
  * 6.PLAYING - Розыгрыш взяток
  * 7.SCORING - Запись очков и обработка результатов
  * 8.FINISHED - Партия завершена
- */
+*/
 export const GAME_PHASES = {
     WAITING: 0, 
     CUTTING: 1, 
@@ -60,100 +60,100 @@ export const GAME_PHASES = {
 /**
  * Минимальная ставка.
  * Minimum bid.
- */
+*/
 export const MIN_BID = 100;
 
 /**
  * Шаг повышения ставки.
  * Bid increment.
- */
+*/
 export const BID_STEP = 5;
 
 /**
  * Количество очков за марьяж с тузами.
  * Points for a marriage with Aces.
- */
+*/
 export const MARRIAGE_ACE_POINTS = 200;
 
 /**
  * Количество очков для победы.
  * Points required to win.
- */
+*/
 export const WIN_SCORE = 1000;
 
 /**
  * Порог попадания на бочку.
  * Score required to enter the barrel.
- */
+*/
 export const BARREL_SCORE = 880;
 
 /**
  * Количество попыток выхода с бочки (победить).
  * Number of attempts to leave the barrel (win).
- */
+*/
 export const BARREL_ATTEMPTS = 3;
 
 /**
  * Размер стандартного штрафа.
  * Standard penalty.
- */
+*/
 export const PENALTY_POINTS = 100;
 
 /**
  * Размер штрафа за вылет с бочки.
  * Penalty for losing while "on the barrel" state.
- */
+*/
 export const BARREL_PENALTY_POINTS = 120;
 
 /**
  * Значение "самосвала" (±555).
  * Score reset value (±555).
- */
+*/
 export const SCORE_RESET_VALUE = 555;
 
 /**
  * Количество повторов валета / девятки при снятии колоды (раздаче карт), приводящее к штрафу.
  *
  * Number of repeated Jacks / Nines during deck cutting (card dealing) that leads to a penalty.
- */
+*/
 export const CUT_PENALTY_LIMIT = 3;
 
 /**
  * Количество накопленных болтов, приводящее к штрафу.
  * Number of accumulated bolts before a penalty is applied.
- */
+*/
 export const BOLT_PENALTY_LIMIT = 3;
 
 /**
  * Количество барабанов за игру у игрока.
  * Start number of drums per player per game.
- */
+*/
 export const DRUMS_COUNT = 3;
 
 /**
  * Минимальное количество очков в руке, чтобы не было пересдачи по очкам.
  *
  * Minimum card points in a hand required to prevent a point-based redeal.
- */
+*/
 export const MIN_HAND_POINTS = 14;
 
 /**
  * Минимальное количество очков в руке, чтобы не было пересдачи по очкам. (Два игрока)
  * 
  * Minimum card points in a hand required to prevent a point-based redeal. (Two player mode)
- */
+*/
 export const MIN_HAND_POINTS_TWO_PLAYERS = 28;
 
 /**
  * Минимальное количество очков в прикупе, чтобы не было пересдачи по очкам.
  *
  * Minimum card points in the talon required to prevent a point-basedredeal.
- */
+*/
 export const MIN_TALON_POINTS = 5;
 
 /**
  * Максимальная ставка при блефе.
  * 
  * Max bid when bluffing.
- */
+*/
 export const MAX_BLUFF_BID = 320;

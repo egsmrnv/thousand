@@ -8,7 +8,7 @@ import type { Card, CardTransfer, GameState, PlayerState } from "./types.ts";
 /**
  * Возвращает победителя торгов на этапе обмена.
  * Returns the winning bidder during the exchange phase.
- */
+*/
 function getExchangeWinPlayer(game: GameState, playerId: number): PlayerState | undefined {
     const bidding = game.bidding;
 
@@ -49,7 +49,7 @@ export function canTakeTalon(game: GameState, playerId: number, talonIndex: 0 | 
 /**
  * Возвращает полученный прикуп, если игрок вправе его видеть.
  * Returns the selected talon if it is visible to the player.
- */
+*/
 export function getVisibleTalon(game: GameState, playerId: number): readonly Card[] {
     const bidding = game.bidding;
     const exchange = game.exchange;
@@ -75,7 +75,7 @@ export function getVisibleTalon(game: GameState, playerId: number): readonly Car
 /**
  * Проверяет право на пересдачу по слабому прикупу.
  * Checks eligibility for a weak-talon redeal.
- */
+*/
 export function canRequestTalonRedeal(game: GameState, playerId: number): boolean {
     if (!game.rules.allowRedeal)
         return false;
@@ -151,7 +151,7 @@ export function canExchangeCards(game: GameState, playerId: number, transfers: r
 /**
  * Передаёт выбранный прикуп победителю торгов.
  * Gives the selected talon to the bidding phase winner.
- */
+*/
 export function takeTalon(game: GameState, playerId: number, talonIndex: 0 | 1 = 0): void {
     const player = getExchangeWinPlayer(game, playerId);
 
@@ -198,7 +198,7 @@ export function requestTalonRedeal(game: GameState, playerId: number): void {
 /**
  * Передаёт карты игрокам и завершает обмен.
  * Transfers cards to other players and finishes the exchange phase.
- */
+*/
 export function exchangeCards(game: GameState, playerId: number, transfers: readonly CardTransfer[]): void {
     const player = getExchangeWinPlayer(game, playerId);
 

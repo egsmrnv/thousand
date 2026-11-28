@@ -1,3 +1,4 @@
+import { getActivePlayers, applyPenalty, restartUnplayedRound } from "./state.ts";
 import { RANKS, GAME_PHASES, MARRIAGE_ACE_POINTS } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
@@ -9,7 +10,7 @@ import type { Card, Suit, PlayedCard, GameState, PlayerState, TrickResult, PlayC
  * @param currentWinner Current winning card. / Текущая  карта, которая пока выигрывает взятку
  * @param trump Current trump suit (null if no trump). Козырная масть (null если нет козыря)
  * @returns True if the challenger beats the current winner, false otherwise. / Возвращает true, если новая карта (challenger) побеждает текущую выигрывающую карту, false в противном случае.
- */
+*/
 export function beats(challenger: Card, currentWinner: Card, trump: Suit | null): boolean {
     return (challenger.suit === currentWinner.suit && challenger.rank < currentWinner.rank) || (trump !== null && challenger.suit === trump && currentWinner.suit !== trump);
 }
@@ -27,7 +28,7 @@ export function beats(challenger: Card, currentWinner: Card, trump: Suit | null)
  * @param trump - Current trump suit (null if no trump). / Текущая масть козыря (null если нет козыря).
  * @param isTrumpOwner - Whether the player declared the current trump. / Является ли игрок владельцем текущего козыря.
  * @returns Array of legal moves. / Массив допустимых ходов.
- */
+*/
 export function getLegalMoves(hand: readonly Card[], leadingSuit: Suit | null, winningCard: Card | null, trump: Suit | null, isTrumpOwner: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): readonly Card[] {
     if (leadingSuit === null) {
         // (!) If the player is first to play a card
@@ -77,7 +78,7 @@ export function getLegalMoves(hand: readonly Card[], leadingSuit: Suit | null, w
  * @param trick Array of cards played in the trick. / Массив сыгранных во взятке карт.
  * @param trump The trump suit for the current round. / Масть козыря для текущего раунда.
  * @returns The winning card or null if the trick is empty. / Выигрывающая карта или null, если массив trick пуст.
- */
+*/
 export function getTrickWinner(trick: readonly PlayedCard[], trump: Suit | null): PlayedCard | null {
     if (trick.length === 0)
         return null;
@@ -97,7 +98,7 @@ export function getTrickWinner(trick: readonly PlayedCard[], trump: Suit | null)
  *
  * @param trick - Played cards. / Сыгранные во взятке карты.
  * @returns Total points. / Сумма очков.
- */
+*/
 export function getTrickPoints(trick: readonly PlayedCard[]): number {
     const cards = trick.map(play => play.card)
     return getCardsPoints(cards);
@@ -112,7 +113,7 @@ export function getTrickPoints(trick: readonly PlayedCard[]): number {
  * @param isLeading - Whether the player is opening the trick. / Открывает ли игрок взятку.
  * @param hasWonTrick - Whether the player has already won a trick in the current round. / Брал ли игрок взятку в текущей раздаче.
  * @returns Whether a marriage can be declared. / Можно ли объявить марьяж.
- */
+*/
 export function canDeclareMarriage(hand: readonly Card[], card: Card, isLeading: boolean, hasWonTrick: boolean, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): boolean {
     // (!) If the player is not opening the trick:
     // > Cannot declare a marriage.
@@ -139,4 +140,54 @@ export function canDeclareMarriage(hand: readonly Card[], card: Card, isLeading:
         return findMarriages(hand).includes(card.suit);
 
     return false;
+}
+
+/**
+ * Возвращает активного игрока, если сейчас его ход.
+ * Returns the active player (if it is the turn of the given player).
+*/
+function getPlayingPlayer(game: GameState, playerId: number): PlayerState | undefined {
+    const contract = game.contract;
+
+    if (game.phase !== GAME_PHASES.PLAYING || contract === null || contract.resigned)
+        return undefined;
+
+    if (game.currentPlayerId !== playerId)
+        return undefined;
+
+    const activePlayers = getActivePlayers(game);
+
+    // (!) The trick must not be completed yet.
+    if (game.currentTrick.length >= activePlayers.length)
+        return undefined;
+
+    // (!) A player cannot play twice in the same trick.
+    if (game.currentTrick.some(play => play.playerId === playerId))
+        return undefined;
+
+    return activePlayers.find(player => player.id === playerId);
+}
+
+/**
+ * Возвращает карты, которыми игрок может походить.
+ * Returns cards that the player can play.
+*/
+export function getPlayerLegalMoves(game: GameState, playerId: number): readonly Card[] {
+    const player = getPlayingPlayer(game, playerId);
+
+    if (player === undefined)
+        return [];
+
+    const leadingSuit = game.currentTrick[0]?.card.suit ?? null;
+    const winningCard = getTrickWinner(game.currentTrick, game.trump.suit)?.card ?? null;
+
+    return getLegalMoves(player.hand, leadingSuit, winningCard, game.trump.suit, game.trump.playerId === playerId, game.rules);
+}
+
+/**
+ * Проверяет, может ли игрок походить выбранной картой.
+ * Checks if the player can play the selected card.
+*/
+export function canPlayCard(game: GameState, playerId: number, card: Card): boolean {
+    return getPlayerLegalMoves(game, playerId).some(legalCard => legalCard.suit === card?.suit && legalCard.rank === card?.rank);
 }

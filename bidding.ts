@@ -52,7 +52,7 @@ export function startBidding(game: GameState): void {
 /**
  * Повышает ставку и передаёт ход следующему участнику торгов.
  * Raises the bid and passes the turn to the next bidder.
- */
+*/
 export function raiseBid(game: GameState, playerId: number, amount: number): void {
     const bidding = game.bidding;
 
@@ -76,7 +76,7 @@ export function raiseBid(game: GameState, playerId: number, amount: number): voi
  * @param game - Current game state.
  * @param playerId - Challenging player.
  * @returns Whether a violation was confirmed. (true / false)
- */
+*/
 export function challengeBid(game: GameState, playerId: number): boolean {
     if (game.phase !== GAME_PHASES.BIDDING)
         throw new Error("Bidding is not active.");
@@ -144,7 +144,7 @@ function canActInBidding(game: GameState, playerId: number): boolean {
  * @param playerId - Bidding player.
  * @param amount - Bid amount.
  * @returns Whether the bid is allowed. (true / false)
- */
+*/
 export function canRaiseBid(game: GameState, playerId: number, amount: number): boolean {
     const bidding = game.bidding;
 
@@ -191,7 +191,7 @@ export function passBid(game: GameState, playerId: number): void {
 /**
  * Переводит ход на следующего участника торгов.
  * Moves bidding to the next player in bidding phase.
- */
+*/
 function moveBidding(game: GameState): void {
     const bidding = game.bidding;
 

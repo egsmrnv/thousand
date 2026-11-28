@@ -11,14 +11,14 @@ export type GameRules = {
      * - 4xJ Four Jacks in the hand.
      * - Fewer than MIN_HAND_POINTS in the hand.
      * - Fewer than MIN_TALON_POINTS in the talon.
-     */
+    */
     allowRedeal: boolean;
 
     /**
      * Можно объявлять марьяж, имея в руке туза каждой масти.
      *
      * Can declare a marriage by having an Ace of each suit in the hand.
-     */
+    */
     allowAceMarriage: boolean;
 
     /**
@@ -29,7 +29,7 @@ export type GameRules = {
      * Is playing a trump card mandatory?
      * true - If the player cannot follow suit but has a trump card, they must play a trump card.
      * false - If the player cannot follow suit, they may play any card.
-     */
+    */
     mustTrump: boolean;
 
     /**
@@ -40,7 +40,7 @@ export type GameRules = {
      * Allow leading with another player's trump suit?
      * true - The player may lead with a trump card, regardless of who declared the trump suit.
      * false - The player cannot lead with another player's trump suit unless only trump cards remain in hand. This restriction does not apply to following plays.
-     */
+    */
     allowForeignTrumpLead: boolean;
 
     /**
@@ -51,21 +51,21 @@ export type GameRules = {
      * Is beating the current winning card mandatory?
      * true - If any legal card can beat the current winning card, the player must play one of those cards.
      * false - The player may play any legal card, even if it cannot beat the current winning card.
-     */
+    */
     mustBeat: boolean;
 
     /**
      * Обязательно взять хотя бы одну взятку перед объявлением марьяжа?
      *
      * Must win at least one trick before declaring a marriage?
-     */
+    */
     requireTrickBeforeMarriage: boolean;
 
     /**
      * Включить систему штрафов за нарушение правил игры?
      *
      * Enable penalties for violating game rules?
-     */
+    */
     enablePenalties: boolean;
 
     /**
@@ -80,7 +80,7 @@ export type GameRules = {
      * Opponents may challenge the bid.
      * If a violation is confirmed, the player receives a penalty, the round is cancelled, and the dealer changes.
      * Bluffing is only available when penalties are enabled.
-     */
+    */
     allowBidBluff: boolean;
 
     /**
@@ -89,40 +89,40 @@ export type GameRules = {
      *
      * Enable the score reset rule?
      * true - If the player's score reaches exactly 555/-555, the score resets to zero.
-     */
+    */
     enableScoreReset: boolean;
 
     /**
      * Включить правило болтов? Болт начисляется если в раздаче игрок не взял ни одной взятки.
      *
      * Enable the "bolts" rule? A bolt counts if the player does not win any tricks in a round.
-     */
+    */
     enableBolts: boolean;
 
     /**
      * Включить «Барабаны»? Каждая разрешённая пересдача расходует один барабан. Всего их DRUMS_COUNT в constants.ts
      * Enable drums? Each allowed redeal spends one drum. Total drum count is DRUMS_COUNT in constants.ts
-     */
+    */
     enableDrums?: boolean;
 
     /**
      * Показывать прикуп всем игрокам независимо от торгов?
      * Always reveal the selected talon to all players (true / false)
-     */
+    */
     alwaysRevealTalon: boolean;
 
     /**
      * ONLY if enablePenalties = true
      * Включить штрафы за недопустимые ходы?
      * Enable penalties for illegal moves?
-     */
+    */
     enableDangerZone: boolean;
 };
 
 /**
  * Стандартные настройки игры.
  * Default game rules.
- */
+*/
 export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
     allowRedeal: true,
     allowAceMarriage: true,
@@ -142,7 +142,7 @@ export const DEFAULT_GAME_RULES: Readonly<GameRules> = Object.freeze({
 /**
  * Создаёт настройки на основе стандартных.
  * Creates rules based on the defaults.
- */
+*/
 export function createGameRules(overrides: Partial<GameRules> = {}): GameRules {
     return {
         ...DEFAULT_GAME_RULES,

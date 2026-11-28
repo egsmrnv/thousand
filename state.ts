@@ -10,7 +10,7 @@ import type { GameState, PlayerState } from "./types.ts";
 /**
  * Возвращает активных игроков текущей раздачи.
  * Returns the active players of the current round.
- */
+*/
 export function getActivePlayers(game: GameState): readonly PlayerState[] {
     if (game.players.length === 4)
         return game.players.filter(player => player.id !== game.dealerId);
@@ -21,7 +21,7 @@ export function getActivePlayers(game: GameState): readonly PlayerState[] {
 /**
  * Применяет штраф к игроку.
  * Applies penalty to a player.
- */
+*/
 export function applyPenalty(game: GameState, player: PlayerState): void {
     if (!game.rules.enablePenalties)
         return;
@@ -55,7 +55,7 @@ export function applyPenalty(game: GameState, player: PlayerState): void {
  *
  * @param game - Current game state. / Текущее состояние игры.
  * @param rotateDealer - Whether to change the dealer. / Менять ли сдающего.
- */
+*/
 export function restartUnplayedRound(game: GameState, rotateDealer: boolean = false): void {
     let dealerIndex = game.players.findIndex(player => player.id === game.dealerId);
 

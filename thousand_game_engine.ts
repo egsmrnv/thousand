@@ -17,7 +17,7 @@ import { getActivePlayers, applyPenalty, restartUnplayedRound } from "./state.ts
  * @param playerCount - Number of players. / Количество игроков.
  * @param rules - Game rules. / Правила игры.
  * @returns Initial game state. / Начальное состояние игры.
- */
+*/
 export function createGame(playerCount: 2 | 3 | 4, rules: Readonly<GameRules> = DEFAULT_GAME_RULES): GameState {
     const players: PlayerState[] = [];
 
@@ -65,7 +65,7 @@ export function createGame(playerCount: 2 | 3 | 4, rules: Readonly<GameRules> = 
  * Prepares a new round.
  *
  * @param game - Current game state. / Текущее состояние игры.
- */
+*/
 export function startRound(game: GameState): void {
     if (game.phase !== GAME_PHASES.WAITING && game.phase !== GAME_PHASES.SCORING)
         throw new Error("Cannot start a round in the current phase.");
@@ -129,7 +129,7 @@ export function startRound(game: GameState): void {
  * @param game - Current game state. / Состояние партии.
  * @param cutCount - Number of cards to cut. / Количество снимаемых карт.
  * @returns Result of the deck cut. / Результат снятия колоды.
- */
+*/
 export function cutDeck(game: GameState, cutCount: number): CutResult {
     // (!) Validate game phase
     if (game.phase !== GAME_PHASES.CUTTING)
@@ -236,7 +236,7 @@ export function cutDeck(game: GameState, cutCount: number): CutResult {
  * Distributes cards between players.
  *
  * @param game - Current game state.
- */
+*/
 export function dealRound(game: GameState): void {
     if (game.phase !== GAME_PHASES.DEALING)
         throw new Error("Cannot deal cards in the current phase.");
@@ -279,7 +279,7 @@ export function dealRound(game: GameState): void {
  * @param game - Current game state.
  * @param playerId 
  * @returns Whether a redeal is allowed. (true / false)
- */
+*/
 export function canRequestRedeal(game: GameState, playerId: number): boolean {
     return findEligibleRedealPlayer(game, playerId) !== undefined;
 }

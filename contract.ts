@@ -7,7 +7,7 @@ import type { GameState, PlayerState } from "./types.ts";
 /**
  * Возвращает заказчика на этапе объявления контракта.
  * Returns the winning bidder during the contract phase.
- */
+*/
 function getContractPlayer(game: GameState, playerId: number): PlayerState | undefined {
     const bidding = game.bidding;
 
@@ -23,7 +23,7 @@ function getContractPlayer(game: GameState, playerId: number): PlayerState | und
 /**
  * Возвращает минимальный допустимый заказ (null если недоступно).
  * Returns the minimum points for contract (null if unavailable).
- */
+*/
 export function getMinContract(game: GameState, playerId: number): number | null {
     const player = getContractPlayer(game, playerId);
     const bidding = game.bidding;
@@ -41,7 +41,7 @@ export function getMinContract(game: GameState, playerId: number): number | null
 /**
  * Возвращает максимально допустимый заказ (null если недопустимо).
  * Returns the maximum points for contract (null if unavailable).
- */
+*/
 export function getMaxContract(game: GameState, playerId: number): number | null {
     const player = getContractPlayer(game, playerId);
     const minContract = getMinContract(game, playerId);
@@ -70,7 +70,7 @@ export function canDeclareContract(game: GameState, playerId: number, amount: nu
 /**
  * Фиксирует окончательный заказ и начинает игру.
  * Submits the final contract and moves to playing phase.
- */
+*/
 export function declareContract(game: GameState, playerId: number, amount: number): void {
     if (!canDeclareContract(game, playerId, amount))
         throw new Error("Invalid contract.");
@@ -119,7 +119,7 @@ export function canResignContract(game: GameState, playerId: number): boolean {
 /**
  * Роспись контракта (заказа), завершение розыгрыша и переход далее.
  * Resigns the contract and moves to scoring phase.
- */
+*/
 export function resignContract(game: GameState, playerId: number): void {
     const contract = game.contract;
 

@@ -67,7 +67,7 @@ export type GameState = {
 /**
  * Состояние снятия колоды (чтобы отслеживать сколько выпало нежелательных карт для штрафа).
  * Deck cutting state (to detect the number of illegal cards for penalty).
- */
+*/
 export type CuttingState = {
     jackCount: number;
     nineCount: number;
@@ -87,7 +87,7 @@ export type CutResult = {
 /**
  * Состояние торговли.
  * Bidding state.
- */
+*/
 export type BiddingState = {
     currentBid: number;
     highestBidderId: number;
@@ -98,7 +98,7 @@ export type BiddingState = {
 
 /**
  * Состояние получения прикупа и обмена картами.
- */
+*/
 export type ExchangeState = {
     readonly talonIndex: 0 | 1;
     readonly selectedTalon: readonly Card[];
@@ -108,7 +108,7 @@ export type ExchangeState = {
 /**
  * Карта, передаваемая сопернику.
  * Card transferred to an opponent.
- */
+*/
 export type CardTransfer = {
     readonly recipientId: number;
     readonly card: Card;
@@ -117,7 +117,7 @@ export type CardTransfer = {
 /**
  * Окончательный заказ игрока.
  * Final contract of the bidding-phase winner.
- */
+*/
 export type ContractState = {
     readonly playerId: number;
     readonly amount: number;
@@ -127,7 +127,7 @@ export type ContractState = {
 /**
  * Результат завершённой взятки.
  * Completed trick result.
- */
+*/
 export type TrickResult = {
     readonly cards: readonly PlayedCard[];
     readonly winnerId: number;
@@ -138,7 +138,7 @@ export type TrickResult = {
 /**
  * Результат команды хода. outcome: 0 - сыгран, 1 - оштрафован
  * Card play result. outcome: 0 - played, 1 - penalized
- */
+*/
 export type PlayCardResult = {
     readonly outcome: 0;
     readonly completedTrick: TrickResult | null;

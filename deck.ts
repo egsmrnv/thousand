@@ -4,7 +4,7 @@ import type { Card } from "./types.ts";
 
 /**
  * Cards of all suits and all ranks
- */
+*/
 export function createDeck(): Card[] {
     const deck: Card[] = [];
     for (const suit of Object.values(SUITS))
@@ -19,7 +19,7 @@ export function createDeck(): Card[] {
 
 /**
  * Checks that the deck contains every valid suit and rank combination exactly once.
- */
+*/
 export function validateDeck(deck: readonly Card[]): boolean {
     const suits = Object.values(SUITS);
     const ranks = Object.values(RANKS);
@@ -45,7 +45,7 @@ export function validateDeck(deck: readonly Card[]): boolean {
  * Adapted for TypeScript.
  * Source: CC BY-SA 4.0
  * https://creativecommons.org/licenses/by-sa/4.0/
- */
+*/
 export function shuffleDeck(deck: readonly Card[]): Card[] {
     const deckCopy = [...deck];
 
@@ -62,7 +62,7 @@ export function shuffleDeck(deck: readonly Card[]): Card[] {
  * Two hands: 10 cards each and two talons of 2 cards.
  * Three or four hands: one talon, with size equal to handCount.
  * Does not mutate the original deck.
- */
+*/
 export function dealCards(deck: readonly Card[], handCount: 2 | 3 | 4): {
     hands: Card[][];
     talon: Card[];
@@ -102,7 +102,7 @@ export function dealCards(deck: readonly Card[], handCount: 2 | 3 | 4): {
  * @param handCount - Number of hands (2, 3 or 4).
  * @param secondTalon - Second talon, empty except in the two-player deal.
  * @returns True if the deal is valid.
- */
+*/
 export function validateDeal(
     hands: readonly (readonly Card[])[],
     talon: readonly Card[],

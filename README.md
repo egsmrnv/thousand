@@ -25,7 +25,7 @@ Next come passing, awarding the talon and setting the contract. The [two-player 
 
 ### Where to work
 
-Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `createGame()`, `startRound()` and `cutDeck()` to see how the game changes state. Import card, deck and trick operations directly from the modules below.
+Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `createGame()`, `startRound()` and `cutDeck()` to see how the game changes state. The main module also selects the active players. Import card, deck, bidding and trick operations directly from the modules below.
 
 | Module | What belongs here |
 | --- | --- |
@@ -34,7 +34,7 @@ Start with [thousand_game_engine.ts](./thousand_game_engine.ts) and follow `crea
 | [types.ts](./types.ts) | Shared types such as `Card`, `PlayedCard` and `GameState`. |
 | [cards.ts](./cards.ts) | Card points and combinations in a hand. `findMarriages()` finds king–queen pairs. |
 | [deck.ts](./deck.ts) | Create, validate, shuffle and deal a deck. `dealCards()` returns hands and a talon. |
-| [bidding.ts](./bidding.ts) | Active players and the bid limit for a hand. |
+| [bidding.ts](./bidding.ts) | Bid limits, opening the auction, raising and challenging bids. |
 | [tricks.ts](./tricks.ts) | Which card can be played, whether a marriage can be declared on that play, and who wins the trick. |
 
 [Rules and reference scenarios](./RULES.md#18-контрольные-сценарии) give the expected results for individual plays and deals.
@@ -73,7 +73,7 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 
 ### Файлы проекта
 
-Начните с [thousand_game_engine.ts](./thousand_game_engine.ts). По функциям `createGame()`, `startRound()` и `cutDeck()` можно проследить, как меняется состояние партии. Функции для работы с картами, колодой и взятками импортируйте напрямую из модулей ниже.
+Начните с [thousand_game_engine.ts](./thousand_game_engine.ts). По функциям `createGame()`, `startRound()` и `cutDeck()` можно проследить, как меняется состояние партии. Главный модуль также определяет активных игроков. Функции для работы с картами, колодой, торгами и взятками импортируйте напрямую из модулей ниже.
 
 | Модуль | Что в нём искать |
 | --- | --- |
@@ -82,7 +82,7 @@ All rights reserved. See [LICENSE](./LICENSE) for details.
 | [types.ts](./types.ts) | Общие типы, в том числе `Card`, `PlayedCard` и `GameState`. |
 | [cards.ts](./cards.ts) | Карточные очки и комбинации в руке. Например, `findMarriages()` находит пары из короля и дамы. |
 | [deck.ts](./deck.ts) | Создание, проверка, перемешивание и раздача колоды. `dealCards()` возвращает руки и прикуп. |
-| [bidding.ts](./bidding.ts) | Активные игроки и предел ставки по марьяжам в руке. |
+| [bidding.ts](./bidding.ts) | Предел ставки, начало торгов, повышение и оспаривание ставки. |
 | [tricks.ts](./tricks.ts) | Какой картой можно пойти, можно ли объявить марьяж при этом ходе и кто забирает взятку. |
 
 В [контрольных сценариях](./RULES.md#18-контрольные-сценарии) можно сверить ожидаемый результат хода или раздачи.

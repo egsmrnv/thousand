@@ -88,4 +88,6 @@ export type BiddingState = {
     currentBid: number;
     highestBidderId: number;
     passedPlayerIds: readonly number[];
+    hasRaised: boolean;
+    challengeOpen: boolean;
 };

@@ -62,12 +62,7 @@ export function findAceMarriage(hand: readonly Card[]): boolean {
     return Object.values(SUITS).every(s => hand.some(card => card.rank === RANKS.ACE && card.suit === s))
 }
 
-/**
- * Calculates the total value of a hand including card points and marriage bonuses.
- * Does not represent actually earned points because marriages are not guaranteed.
- * If ALLOW_ACE_MARRIAGE is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
- */
-export function getCardsPointsWithMarriages(hand: readonly Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
+export function getHandMarriagePoints(hand: readonly Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
     const marriages = findMarriages(hand);
     let points = 0;
 
@@ -77,5 +72,14 @@ export function getCardsPointsWithMarriages(hand: readonly Card[], rules: Readon
     if (rules.allowAceMarriage && findAceMarriage(hand))
         points += MARRIAGE_ACE_POINTS;
 
-    return points + getCardsPoints(hand);
+    return points;
+}
+
+/**
+ * Calculates the total value of a hand including card points and marriage bonuses.
+ * Does not represent actually earned points because marriages are not guaranteed.
+ * If ALLOW_ACE_MARRIAGE is true it calls findAceMarriage and adds MARRIAGE_ACE_POINTS if true.
+ */
+export function getCardsPointsWithMarriages(hand: readonly Card[], rules: Readonly<GameRules> = DEFAULT_GAME_RULES): number {
+    return getHandMarriagePoints(hand, rules) + getCardsPoints(hand);
 }

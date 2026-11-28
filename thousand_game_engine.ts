@@ -1,4 +1,4 @@
-import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_PER_PLAYER } from "./constants.ts";
+import { RANKS, GAME_PHASES, CUT_PENALTY_LIMIT, PENALTY_POINTS, BARREL_SCORE, BARREL_PENALTY_POINTS, SCORE_RESET_VALUE, MIN_HAND_POINTS, DRUMS_COUNT } from "./constants.ts";
 import { DEFAULT_GAME_RULES } from "./settings.ts";
 import type { GameRules } from "./settings.ts";
 import { createDeck, shuffleDeck, validateDeck, dealCards, validateDeal } from "./deck.ts";
@@ -31,7 +31,7 @@ export function createGame(
             roundPoints: 0,
             tricksWon: 0,
             bolts: 0,
-            drumsRemaining: rules.enableDrums ? DRUMS_PER_PLAYER : 0,
+            drumsRemaining: rules.enableDrums ? DRUMS_COUNT : 0,
             barrelAttemptsUsed: 0
         });
     }
